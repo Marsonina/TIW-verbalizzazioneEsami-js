@@ -12,33 +12,6 @@ window.addEventListener("load", ()=>{
 	}
 },false);
 
-/*function UserInfo(_user, _userInfoContainer){
-	this.name = _user.name;
-	this.surname = _user.surname;
-	this.matricola = _user.matricola;
-	this.role = _user.role;
-	
-	this.show = function(){
-		_userInfoContainer.name = this.name;
-		_userInfoContainer.surname = this.surname;
-		_userInfoContainer.matricola = this.matricola;
-		_userInfoContainer.role = this.role;
-		console.log(this.name);
-		console.log(this.surname);
-		console.log(this.matricola);
-	}
-}
-
-function PageManager(){
-	var info = document.getElementById("userInfo");
-	this.start = function(){
-		userInfo = new UserInfo(JSON.parse(sessionStorage.getItem("user")), info)
-		userInfo.show();
-		console.log(info.name);
-		console.log(info.surname);
-		console.log(info.matricola);
-	}
-}*/
 function UserInfo(_user, _userInfoContainer){
   this.name = _user.name;
   this.surname = _user.surname;
