@@ -3,8 +3,59 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Teacher</title>
+<script src="utils.js" charset="utf-8" defer></script>
+<script src="teacherPage.js" charset="utf-8" defer></script>
+<script src="reorder.js" charset="utf-8" defer></script>
 </head>
 <body>
-	<h1>Welcome to polimi user authentication page</h1>
+	<div id = "userInfo" align="right">
+		<span id="name">MARISSA</span>
+		<span id="surname">MAYER</span>
+		<span id="matricola">-----</span>
+		<a href = "Logout">Logout</a><br>
+		<span id="role">Teacher</span>
+	</div>
+	<hr>
+	<div id ="title1" align="left">
+		<h1>Polimi servizi online</h1><br>
+		<p>
+			Select a course and choose an exam date!
+		</p>
+	</div>
+	<div id ="coursesDates">
+	<table>
+		<tr>
+			<td>
+				<table id="courses_container" border="1">
+					<thead>
+						<tr>
+							<th>Course ID</th>
+							<th>Course Name</th>
+						</tr>
+					</thead>
+					<tbody id ="courses_list">
+					</tbody>
+				</table>
+			</td>
+			<td>
+				<br>Please select a course<span id = "courseId"></span>x<br>
+					
+				<div>
+					No exam date for course number <span id="courseId">x</span>
+				</div>
+				<div>
+					<form id="goToViewStud" action="#">
+						Choose an exam date for course number <span>-</span>:
+						<br> 
+						<select name="examDate">
+							<option id="dates_list">xx</option></select>
+							<input type="hidden" name="courseId"><br>
+						<input id="viewStud" type="button" value="View students">
+					</form>
+				</div>
+			</td>
+		</tr>
+	</table>
+	</div>
 </body>
 </html>
