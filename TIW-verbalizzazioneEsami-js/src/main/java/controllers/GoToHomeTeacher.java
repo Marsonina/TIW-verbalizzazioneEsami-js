@@ -71,16 +71,16 @@ public class GoToHomeTeacher extends HttpServlet {
 		
 		JsonObject json = new JsonObject();
 		Gson gson = new Gson();
-		String courseListString = gson.toJson(courses);
-		String examsListString = gson.toJson(exams);
-		
-		json.addProperty("courses", courseListString);
+
+		json.add("courses", gson.toJsonTree(courses));
 		json.addProperty("courseId", chosenCourseId);
-		json.addProperty("exams", examsListString);
+		json.add("exams", gson.toJsonTree(exams));
+
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		String jsonString = new Gson().toJson(json);
+		String jsonString = json.toString();
 		response.getWriter().write(jsonString);
+
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)

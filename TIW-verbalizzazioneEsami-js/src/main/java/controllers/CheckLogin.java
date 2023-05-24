@@ -21,6 +21,7 @@ import utility.DbConnection;
 
 
 @WebServlet("/CheckLogin")
+@MultipartConfig
 public class CheckLogin extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
@@ -45,9 +46,14 @@ public class CheckLogin extends HttpServlet {
 		String usrn = null;
 		String pwd = null;
 		String role = null;
+		
 		usrn = StringEscapeUtils.escapeJava(request.getParameter("username"));
 		pwd = StringEscapeUtils.escapeJava(request.getParameter("pwd"));
 		role = StringEscapeUtils.escapeJava(request.getParameter("role"));
+		
+		System.out.println(usrn);
+		System.out.println(pwd);
+		System.out.println(role);
 		
 		UserDAO usr = new UserDAO(connection);
 		User u = null;
