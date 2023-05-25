@@ -50,8 +50,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
             self.courseslist.textContent = "No courses!";
             return;
           }
-          var coursesToShow =response.courses;
-          console.log(coursesToShow);
+          var coursesToShow = JSON.parse(response.courses);
           self.update(coursesToShow);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
@@ -67,18 +66,18 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
     var tableBody = this.courseslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
 
-    arraycourses.forEach(function(course) {
+    arraycourses.forEach(function(course) {  
       var row = document.createElement("tr");
 
       // Cella per l'ID del corso
       var idCell = document.createElement("td");
-      idCell.textContent = course.id;
+      idCell.textContent = course.courseId;
       row.appendChild(idCell);
 
       // Cella per il nome del corso come link
       var nameCell = document.createElement("td");
       var courseLink = document.createElement("a");
-      courseLink.textContent = course.name;
+      courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
       courseLink.addEventListener("click", function() {
         // exams.show(course.id)
