@@ -46,11 +46,11 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
         var message = req.responseText;
         if (req.status == 200) {
           var response = JSON.parse(req.responseText);
-          if (response.length == 0) {
+          var coursesToShow = JSON.parse(response.courses);
+          if (coursesToShow.length == 0) {
             self.courseslist.textContent = "No courses!";
             return;
           }
-          var coursesToShow = JSON.parse(response.courses);
           self.update(coursesToShow);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
@@ -80,7 +80,8 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
       courseLink.addEventListener("click", function() {
-        // exams.show(course.id)
+        examsList.show(course.courseId)
+  
       });
       nameCell.appendChild(courseLink);
       row.appendChild(nameCell);
@@ -121,6 +122,65 @@ function studentsList (_studentscontainer, _studentslist) {
     });
   };
 
+//Exams list
+function ExamsList(_examslist){
+	this.examslist = _examslist;
+	
+  this.reset = function() {
+    this.examslist.style.visibility = "hidden";
+  };
+
+  this.show = function(courseId) {
+	this.examslist.style.visibility = "visible"; 
+    var self = this;
+    makeCall("GET", "GoToHomeTeacher?courseId="+courseId, null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          var examsToShow = JSON.parse(response.exams);
+          console.log(examsToShow);
+          console.log(courseId);
+          if (examsToShow.length == 0) {
+            document.getElementById("noExams").textContent("No exam date for course number "+ courseId);
+            return;
+          }
+          self.update(examsToShow,courseId);
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          console.log(message);
+        }
+      }
+    });
+  };
+	
+  this.update = function(arrayexams,courseid) {
+
+	  document.getElementById("title2").textContent = "Exam dates for the course number: " + courseid;
+
+	    // Get the form elements
+	  var form = document.getElementById('goToViewStud');
+	  var examDateElement = form.querySelector('select[name="examDate"]');
+	
+	  // Clear any existing options from the select element
+	  examDateElement.innerHTML = '';
+	
+	  // Create and append new option elements based on the date array
+	  arrayexams.forEach(function(date) {
+	    var option = document.createElement('option');
+	    option.textContent = date.date;
+	    examDateElement.appendChild(option);
+	  });
+	  
+	  document.getElementById("viewStud").addEventListener("click", function() {
+		//
+      });
+  };
+	
+}
+>>>>>>> branch 'main' of https://github.com/Marsonina/TIW-verbalizzazioneEsami-js.git
 
 //Manage the page
 function PageManager(){
@@ -132,12 +192,19 @@ function PageManager(){
     userInfo.show();
     
     coursesList = new CoursesList(document.getElementById("title1"),
-    document.getElementById("courses_container"),document.getElementById("courses_list"))
+    document.getElementById("courses_container"),document.getElementById("courses_list"));
     coursesList.show();
     
+<<<<<<< HEAD
     studentsList = new StudentsList (document.getElementById("examStudents_container"),
     document.getElementById("students_list"))
     studentsList.show();
+=======
+    examsList = new ExamsList(document.getElementById("goToViewStud"));
+    examsList.reset();
+    
+   
+>>>>>>> branch 'main' of https://github.com/Marsonina/TIW-verbalizzazioneEsami-js.git
   }
 }
 }
