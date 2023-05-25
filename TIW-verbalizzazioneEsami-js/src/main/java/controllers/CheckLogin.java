@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import com.google.gson.Gson;
+
 import beans.User;
 import dao.UserDAO;
 import utility.DbConnection;
@@ -43,22 +45,17 @@ public class CheckLogin extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		//get of parameters insert by the user
-		String usrn = null;
-		String pwd = null;
-		String role = null;
-		
+		String usrn ;
+		String pwd ;
+		String role ;
 		usrn = StringEscapeUtils.escapeJava(request.getParameter("username"));
 		pwd = StringEscapeUtils.escapeJava(request.getParameter("pwd"));
 		role = StringEscapeUtils.escapeJava(request.getParameter("role"));
 		
-		System.out.println(usrn);
-		System.out.println(pwd);
-		System.out.println(role);
-		
 		UserDAO usr = new UserDAO(connection);
 		User u = null;
 		
-		if (usrn == null || pwd == null || usrn.isEmpty() || pwd.isEmpty() ) {
+		if (usrn == null || pwd == null || role ==null || usrn.isEmpty() || pwd.isEmpty() || role.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Credentials must be not null");
 			return;
@@ -88,7 +85,8 @@ public class CheckLogin extends HttpServlet {
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
-			response.getWriter().println(usrn);
+			String uJSON = new Gson().toJson(u);
+			response.getWriter().println(uJSON);
 		}
 	}
 

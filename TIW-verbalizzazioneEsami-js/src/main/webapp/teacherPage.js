@@ -30,7 +30,32 @@ function UserInfo(_user, _userInfoContainer){
   }
 }
 
+  this.update = function(arraycourses) {
+    var tableBody = this.courseslist;
+    tableBody.innerHTML = ""; // Svuota il corpo della tabella
 
+    arraycourses.forEach(function(course) {
+      var row = document.createElement("tr");
+
+      // Cella per l'ID del corso
+      var idCell = document.createElement("td");
+      idCell.textContent = course.id;
+      row.appendChild(idCell);
+
+      // Cella per il nome del corso come link
+      var nameCell = document.createElement("td");
+      var courseLink = document.createElement("a");
+      courseLink.textContent = course.name;
+      courseLink.setAttribute("href", "#");
+      courseLink.addEventListener("click", function() {
+        // exams.show(course.id)
+      });
+      nameCell.appendChild(courseLink);
+      row.appendChild(nameCell);
+
+      tableBody.appendChild(row);
+    });
+  };
 
 //Manage the page
 function PageManager(){
@@ -40,6 +65,6 @@ function PageManager(){
     var user = JSON.parse(sessionStorage.getItem("user"));
     userInfo = new UserInfo(user, info);
     userInfo.show();
-    
+    
   }
 }
