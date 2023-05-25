@@ -121,6 +121,51 @@ function studentsList (_studentscontainer, _studentslist) {
       }
     });
   };
+  
+  this.update = function(arrayStudents) {
+    var tableBody = this.studentslist;
+    tableBody.innerHTML = ""; // Svuota il corpo della tabella
+
+    arrayStudents.forEach(function(examStudent) {  
+      var row = document.createElement("tr");
+
+      // Cella per l'ID del corso
+      var nameCell = document.createElement("td");
+      nameCell.textContent = examStudent.name;
+      row.appendChild(nameCell);
+      // Cella per il nome del corso come link
+      var surnameCell = document.createElement("td");
+      surnameCell.textContent = examStudent.surname;
+      row.appendChild(surnameCell);
+      
+      var emailCell = document.createElement("td");
+      emailCell.textContent = examStudent.email;
+      row.appendChild(emailCell);
+      
+      var degreeCell = document.createElement("td");
+      degreeCell.textContent = examStudent.degree;
+      row.appendChild(degreeCell);
+      
+      var resultCell = document.createElement("td");
+      resultCell.textContent = examStudent.result;
+      row.appendChild(resultCell);
+      
+      var resultStateCell = document.createElement("td");
+      resultStateCell.textContent = examStudent.resultState;
+      row.appendChild(resultStateCell);
+     
+      var modifyCell = document.createElement("td");
+	  var modifyButton = document.createElement("button");
+	  modifyButton.textContent = "Modify";
+	  modifyButton.addEventListener('click', function() {
+		  });
+      modifyCell.appendChild(modifyButton);
+      row.appendChild(modifyCell);
+
+  	  tableBody.appendChild(row);
+    });
+  };
+}
 
 //Exams list
 function ExamsList(_examslist){
@@ -180,7 +225,6 @@ function ExamsList(_examslist){
   };
 	
 }
->>>>>>> branch 'main' of https://github.com/Marsonina/TIW-verbalizzazioneEsami-js.git
 
 //Manage the page
 function PageManager(){
@@ -195,16 +239,13 @@ function PageManager(){
     document.getElementById("courses_container"),document.getElementById("courses_list"));
     coursesList.show();
     
-<<<<<<< HEAD
+    examsList = new ExamsList(document.getElementById("goToViewStud"));
+    examsList.reset();
+
     studentsList = new StudentsList (document.getElementById("examStudents_container"),
     document.getElementById("students_list"))
     studentsList.show();
-=======
-    examsList = new ExamsList(document.getElementById("goToViewStud"));
-    examsList.reset();
     
-   
->>>>>>> branch 'main' of https://github.com/Marsonina/TIW-verbalizzazioneEsami-js.git
+    
   }
-}
 }
