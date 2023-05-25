@@ -90,6 +90,38 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 }
 
+function studentsList (_studentscontainer, _studentslist) {
+	this.studentscontainer = _studentscontainer;
+	this.studentslist = _studentslist;
+	
+	this.reset = function() {
+    this.coursescontainer.style.visibility = "hidden";
+  };
+  
+  this.show = function() {
+    var self = this;
+    makeCall("GET", "GoToEnrolledStudents", null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          if (response.length == 0) {
+            self.courseslist.textContent = "No enrolled students for this exam!";
+            return;
+          }
+          var studentsToShow = JSON.parse(response.students);
+          self.update(studentsToShow);
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          self.courseslist.textContent = message;
+        }
+      }
+    });
+  };
+
+
 //Manage the page
 function PageManager(){
   var info = document.getElementById("userInfo");
@@ -102,5 +134,10 @@ function PageManager(){
     coursesList = new CoursesList(document.getElementById("title1"),
     document.getElementById("courses_container"),document.getElementById("courses_list"))
     coursesList.show();
+    
+    studentsList = new StudentsList (document.getElementById("examStudents_container"),
+    document.getElementById("students_list"))
+    studentsList.show();
   }
+}
 }
