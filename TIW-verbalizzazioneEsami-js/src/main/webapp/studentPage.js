@@ -179,7 +179,7 @@ function Result(_title,_resultcontainer){
 	        if (req.status == 200) {
 	          var response = JSON.parse(req.responseText);
 	          console.log(response);
-	          if(response.resultState === "NON INSERITO") {
+	          if(response.resultState === "NON INSERITO" || response.resultState === "INSERITO") {
 				  document.getElementById("examInfo").textContent = "Il voto non è disponibile";
 	            return;
 	          }
@@ -217,20 +217,38 @@ function Result(_title,_resultcontainer){
 		  console.log(student.matricola);
 		  console.log(matricolaElement.textContent);
 		
-		  if (student.resultstate === 'PUBBLICATO') {
+		  if (student.resultState === 'PUBBLICATO') {
 		    refuseButton.disabled = false;
-		  } else if (student.resultstate === 'RIFIUTATO'){
+		  } else if (student.resultState === 'RIFIUTATO'){
+			  console.log("Rifiutato");
 		     document.getElementById('refuse').textContent="Il voto è stato rifiutato"
-		  } else {
+		  } else if (student.resultState === 'VERBALIZZATO'){
 			  refuseButton.disabled = true;
 		  }
 		
 		  refuseButton.addEventListener('click', function() {
-		    // Codice da eseguire quando il pulsante "Refuse" viene cliccato
+		  	refuse(examdate,courseid); 
 		  });
 		
 	}
 	
+}
+
+refuse = function(examdate,courseid){
+    makeCall("GET", "RefuseMark?courseId="+courseid+"&examDate="+examdate, null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          result.update(examdate,courseid,response);
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          console.log(message);
+        }
+      }
+    });
 }
 
 
@@ -252,6 +270,10 @@ function PageManager(){
     
     result = new Result(document.getElementById("title3"),document.getElementById("examInfo"));
     result.reset();
+    
+     document.querySelector("a[href='Logout']").addEventListener('click', () => {
+	        window.sessionStorage.removeItem('username');
+	      })
   }
 
 }

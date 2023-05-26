@@ -266,6 +266,9 @@ function PageManager(){
     studentsList = new StudentsList (document.getElementById("title3"), document.getElementById("examStudents_container"),document.getElementById("students_list"))
     studentsList.reset();
     
+     document.querySelector("a[href='Logout']").addEventListener('click', () => {
+        window.sessionStorage.removeItem('username');
+      })
     
   }
 }
