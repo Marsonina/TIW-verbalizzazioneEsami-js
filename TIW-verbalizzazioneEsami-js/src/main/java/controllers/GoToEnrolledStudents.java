@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import beans.User;
 import utility.CheckPermissions;
@@ -65,18 +64,20 @@ public class GoToEnrolledStudents extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in exam info database extraction");
 		}
 		
+		try {
+			students = eDao.getStudents();
+		}
+		catch(SQLException e) {
+			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in exam students info database extraction");
+		}	
 		
-		JsonObject json = new JsonObject();
 		Gson gson = new Gson();
 
-		json.add("courses", gson.toJsonTree(students));
-		json.addProperty("courseId", chosenCourseId);
-		json.addProperty("examDate", selectedDate);
-
+		String jsonString = gson.toJson(students);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		String jsonString = json.toString();
 		response.getWriter().write(jsonString);
+		
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
