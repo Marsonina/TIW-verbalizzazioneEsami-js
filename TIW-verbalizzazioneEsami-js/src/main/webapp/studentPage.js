@@ -115,10 +115,12 @@ function ExamsList(_title, _examslist){
           console.log(examsToShow);
           console.log(courseId);
           if (examsToShow.length == 0) {
-			  document.getElementById("title2").textContent = "No exam date for course number " + courseId;
-			  examsList.reset();
+			  document.getElementById("noExams").textContent = "No exam date for course number " + courseId;
+			  examsList.reset();			  
             return;
-          }
+          }else{
+			  document.getElementById("noExams").textContent = " ";
+		  }
           self.update(examsToShow,courseId);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
@@ -194,9 +196,9 @@ function Result(_title,_resultcontainer){
 	
 	this.update = function (examdate,courseid,student){
 		  this.title.textContent = "Course id: " + courseid +"\n" +"Exam date: "+examdate;	
-		 var matricolaElement = document.getElementById('matricola');
-		var nameElement = document.getElementById('name');
-		var surnameElement = document.getElementById('surname');
+		 var matricolaElement = document.getElementById('matricola2');
+		var nameElement = document.getElementById('name2');
+		var surnameElement = document.getElementById('surname2');
 		var degreeElement = document.getElementById('degree');
 		var emailElement = document.getElementById('email');
 		var resultElement = document.getElementById('result');
@@ -214,11 +216,13 @@ function Result(_title,_resultcontainer){
 		  console.log(student.matricola);
 		  console.log(matricolaElement.textContent);
 		
-		  /*if (student.resultstate === 'PUBBLICATO') {
-		    refuseButton.style.visibility = 'visible';
+		  if (student.resultstate === 'PUBBLICATO') {
+		    refuseButton.disabled = false;
+		  } else if (student.resultstate === 'RIFIUTATO'){
+		     document.getElementById('refuse').textContent="Il voto è stato rifiutato"
 		  } else {
-		    refuseButton.style.visibility = 'hidden';
-		  }*/
+			  refuseButton.disabled = true;
+		  }
 		
 		  refuseButton.addEventListener('click', function() {
 		    // Codice da eseguire quando il pulsante "Refuse" viene cliccato
