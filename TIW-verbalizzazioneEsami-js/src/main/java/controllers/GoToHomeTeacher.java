@@ -66,7 +66,9 @@ public class GoToHomeTeacher extends HttpServlet {
 			}
 		} catch (SQLException e) {
 			// throw new ServletException(e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failure in course info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Internal server error, retry later");
+			return;
 		}
 		
 		JsonObject json = new JsonObject();
@@ -77,6 +79,7 @@ public class GoToHomeTeacher extends HttpServlet {
 		json.addProperty("courses", courseListString);
 		json.addProperty("courseId", chosenCourseId);
 		json.addProperty("exams", examsListString);
+		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		String jsonString = new Gson().toJson(json);
