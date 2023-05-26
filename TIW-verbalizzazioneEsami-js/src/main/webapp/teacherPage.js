@@ -80,13 +80,96 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
       courseLink.addEventListener("click", function() {
-        examsList.show(course.courseId)
+      examsList.show(course.courseId)
   
       });
       nameCell.appendChild(courseLink);
       row.appendChild(nameCell);
 
       tableBody.appendChild(row);
+    });
+  };
+}
+
+function StudentsList (_studentscontainer, _studentslist) {
+	this.studentscontainer = _studentscontainer;
+	this.studentslist = _studentslist;
+	
+	this.reset = function() {
+    this.studentscontainer.style.visibility = "hidden";
+  };
+  
+  this.show = function(courseId, examDate) {
+	coursesList.reset();
+	examsList.reset();
+	this.studentscontainer.style.visibility = "visible";
+    var self = this;
+    makeCall("GET", "GoToEnrolledStudents?courseId="+courseId+"&"+"examDate="+examDate, null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          console.log(response);
+          if (response.length == 0) {
+            self.studentslist.textContent = "No enrolled students for this exam!";
+            return;
+          }
+          self.update(response);
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          self.studentslist.textContent = message;
+        }
+      }
+    });
+  };
+  
+  this.update = function(arrayStudents) {
+    var tableBody = this.studentslist;
+    tableBody.innerHTML = ""; // Svuota il corpo della tabella
+
+    arrayStudents.forEach(function(examStudent) {  
+      var row = document.createElement("tr");
+      
+     var matricolaCell = document.createElement("td");
+      matricolaCell.textContent = examStudent.matricola;
+      row.appendChild(matricolaCell);
+
+      // Cella per l'ID del corso
+      var nameCell = document.createElement("td");
+      nameCell.textContent = examStudent.name;
+      row.appendChild(nameCell);
+      // Cella per il nome del corso come link
+      var surnameCell = document.createElement("td");
+      surnameCell.textContent = examStudent.surname;
+      row.appendChild(surnameCell);
+      
+      var emailCell = document.createElement("td");
+      emailCell.textContent = examStudent.email;
+      row.appendChild(emailCell);
+      
+      var degreeCell = document.createElement("td");
+      degreeCell.textContent = examStudent.degree;
+      row.appendChild(degreeCell);
+      
+      var resultCell = document.createElement("td");
+      resultCell.textContent = examStudent.result;
+      row.appendChild(resultCell);
+      
+      var resultStateCell = document.createElement("td");
+      resultStateCell.textContent = examStudent.resultState;
+      row.appendChild(resultStateCell);
+     
+      var modifyCell = document.createElement("td");
+	  var modifyButton = document.createElement("button");
+	  modifyButton.textContent = "Modify";
+	  modifyButton.addEventListener('click', function() {
+		  });
+      modifyCell.appendChild(modifyButton);
+      row.appendChild(modifyCell);
+
+  	  tableBody.appendChild(row);
     });
   };
 }
@@ -144,7 +227,8 @@ function ExamsList(_examslist){
 	  });
 	  
 	  document.getElementById("viewStud").addEventListener("click", function() {
-		studentsList.show();
+		  var selectedDate = examDateElement.value
+		studentsList.show(courseid, selectedDate);
       });
   };
 	
@@ -165,7 +249,10 @@ function PageManager(){
     
     examsList = new ExamsList(document.getElementById("goToViewStud"));
     examsList.reset();
+
+    studentsList = new StudentsList (document.getElementById("examStudents_container"),document.getElementById("students_list"))
+    studentsList.reset();
     
-   
+    
   }
 }

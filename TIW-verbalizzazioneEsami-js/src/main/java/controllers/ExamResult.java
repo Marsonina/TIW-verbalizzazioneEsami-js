@@ -67,7 +67,7 @@ public class ExamResult extends HttpServlet {
 			List<String> currStudents = cDao.findAttendingStudent();
 			if(currStudents == null || !currStudents.contains(user.getMatricola())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().println("Try to access to not attended course");
+				response.getWriter().println("Trying to access to not attended course");
 				return;
 			}				
 		} catch (SQLException e) {
