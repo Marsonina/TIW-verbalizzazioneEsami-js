@@ -30,6 +30,7 @@ function UserInfo(_user, _userInfoContainer){
   }
 }
 
+
 function CoursesList(_title, _coursescontainer, _courseslist) {
   this.title = _title;
   this.coursescontainer = _coursescontainer;
@@ -37,6 +38,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
 
   this.reset = function() {
     this.coursescontainer.style.visibility = "hidden";
+    this.title.textContent = " ";
   };
 
   this.show = function() {
@@ -63,6 +65,8 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 
   this.update = function(arraycourses) {
+	this.title.textContent = "Select a date and choose an exam!"; 
+
     var tableBody = this.courseslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
 
@@ -80,7 +84,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
       courseLink.addEventListener("click", function() {
-      examsList.show(course.courseId)
+        examsList.show(course.courseId)
   
       });
       nameCell.appendChild(courseLink);
@@ -91,7 +95,72 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 }
 
-function StudentsList (_studentscontainer, _studentslist) {
+//Exams list
+function ExamsList(_title, _examslist){
+	this.title = _title;
+	this.examslist = _examslist;
+	
+  this.reset = function() {
+    this.examslist.style.visibility = "hidden";
+  };
+
+  this.show = function(courseId) {
+	this.examslist.style.visibility = "visible"; 
+    var self = this;
+    makeCall("GET", "GoToHomeTeacher?courseId="+courseId, null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          var examsToShow = JSON.parse(response.exams);
+          console.log(examsToShow);
+          console.log(courseId);
+          if (examsToShow.length == 0) {
+			  document.getElementById("noExams").textContent = "No exam date for course number " + courseId;
+			  examsList.reset();			  
+            return;
+          }else{
+			  document.getElementById("noExams").textContent = " ";
+		  }
+          self.update(examsToShow,courseId);
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          console.log(message);
+        }
+      }
+    });
+  };
+	
+  this.update = function(arrayexams,courseid) {
+
+	  this.title.textContent = "Exam dates for the course number: " + courseid;
+
+	    // Get the form elements
+	  var form = document.getElementById('goToViewRes');
+	  var examDateElement = form.querySelector('select[name="examDate"]');
+	
+	  // Clear any existing options from the select element
+	  examDateElement.innerHTML = '';
+	
+	  // Create and append new option elements based on the date array
+	  arrayexams.forEach(function(date) {
+	    var option = document.createElement('option');
+	    option.textContent = date.date;
+	    examDateElement.appendChild(option);
+	  });
+	  
+	  document.getElementById("viewRes").addEventListener("click", function() {
+		var selectedExam = examDateElement.value;
+		studentsList.show(courseid, selectedExam);
+      });
+  };
+	
+}
+
+function StudentsList (_title,_studentscontainer, _studentslist) {
+	this.title = _title;
 	this.studentscontainer = _studentscontainer;
 	this.studentslist = _studentslist;
 	
@@ -110,10 +179,13 @@ function StudentsList (_studentscontainer, _studentslist) {
         if (req.status == 200) {
           var response = JSON.parse(req.responseText);
           console.log(response);
-          if (response.length == 0) {
-            self.studentslist.textContent = "No enrolled students for this exam!";
+          if (response == null) {
+            _title.textContent = "No enrolled students for this exam!" + " Course id: "+ courseId + " Exam date: "+ examDate;
+            studentsList.reset();
             return;
-          }
+          }else{
+			  _title.textContent = "Course id: "+courseId+ " Exam date: "+examDate;
+		  }
           self.update(response);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
@@ -174,65 +246,6 @@ function StudentsList (_studentscontainer, _studentslist) {
   };
 }
 
-//Exams list
-function ExamsList(_examslist){
-	this.examslist = _examslist;
-	
-  this.reset = function() {
-    this.examslist.style.visibility = "hidden";
-  };
-
-  this.show = function(courseId) {
-	this.examslist.style.visibility = "visible"; 
-    var self = this;
-    makeCall("GET", "GoToHomeTeacher?courseId="+courseId, null, function(req) {
-      if (req.readyState == 4) {
-        var message = req.responseText;
-        if (req.status == 200) {
-          var response = JSON.parse(req.responseText);
-          var examsToShow = JSON.parse(response.exams);
-          console.log(examsToShow);
-          console.log(courseId);
-          if (examsToShow.length == 0) {
-            document.getElementById("noExams").textContent("No exam date for course number "+ courseId);
-            return;
-          }
-          self.update(examsToShow,courseId);
-        } else if (req.status == 403) {
-          window.location.href = req.getResponseHeader("Location");
-          window.sessionStorage.removeItem('user');
-        } else {
-          console.log(message);
-        }
-      }
-    });
-  };
-	
-  this.update = function(arrayexams,courseid) {
-
-	  document.getElementById("title2").textContent = "Exam dates for the course number: " + courseid;
-
-	    // Get the form elements
-	  var form = document.getElementById('goToViewStud');
-	  var examDateElement = form.querySelector('select[name="examDate"]');
-	
-	  // Clear any existing options from the select element
-	  examDateElement.innerHTML = '';
-	
-	  // Create and append new option elements based on the date array
-	  arrayexams.forEach(function(date) {
-	    var option = document.createElement('option');
-	    option.textContent = date.date;
-	    examDateElement.appendChild(option);
-	  });
-	  
-	  document.getElementById("viewStud").addEventListener("click", function() {
-		  var selectedDate = examDateElement.value
-		studentsList.show(courseid, selectedDate);
-      });
-  };
-	
-}
 
 //Manage the page
 function PageManager(){
@@ -247,10 +260,10 @@ function PageManager(){
     document.getElementById("courses_container"),document.getElementById("courses_list"));
     coursesList.show();
     
-    examsList = new ExamsList(document.getElementById("goToViewStud"));
+    examsList = new ExamsList(document.getElementById("title2"),document.getElementById("goToViewRes"));
     examsList.reset();
 
-    studentsList = new StudentsList (document.getElementById("examStudents_container"),document.getElementById("students_list"))
+    studentsList = new StudentsList (document.getElementById("title3"), document.getElementById("examStudents_container"),document.getElementById("students_list"))
     studentsList.reset();
     
     
