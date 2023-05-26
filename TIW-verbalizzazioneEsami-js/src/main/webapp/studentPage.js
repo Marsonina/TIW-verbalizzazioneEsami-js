@@ -194,9 +194,9 @@ function Result(_title,_resultcontainer){
 	
 	this.update = function (examdate,courseid,student){
 		  this.title.textContent = "Course id: " + courseid +"\n" +"Exam date: "+examdate;	
-		 var matricolaElement = document.getElementById('matricola');
-		var nameElement = document.getElementById('name');
-		var surnameElement = document.getElementById('surname');
+		var matricolaElement = document.getElementById('matricola2');
+		var nameElement = document.getElementById('name2');
+		var surnameElement = document.getElementById('surname2');
 		var degreeElement = document.getElementById('degree');
 		var emailElement = document.getElementById('email');
 		var resultElement = document.getElementById('result');
