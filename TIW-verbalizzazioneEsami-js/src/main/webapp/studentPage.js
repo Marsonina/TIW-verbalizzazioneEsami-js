@@ -115,10 +115,12 @@ function ExamsList(_title, _examslist){
           console.log(examsToShow);
           console.log(courseId);
           if (examsToShow.length == 0) {
-			  document.getElementById("title2").textContent = "No exam date for course number " + courseId;
-			  examsList.reset();
+			  document.getElementById("noExams").textContent = "No exam date for course number " + courseId;
+			  examsList.reset();			  
             return;
-          }
+          }else{
+			  document.getElementById("noExams").textContent = " ";
+		  }
           self.update(examsToShow,courseId);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
@@ -177,7 +179,7 @@ function Result(_title,_resultcontainer){
 	        if (req.status == 200) {
 	          var response = JSON.parse(req.responseText);
 	          console.log(response);
-	          if(response.resultState === "NON INSERITO") {
+	          if(response.resultState === "NON INSERITO" || response.resultState === "INSERITO") {
 				  document.getElementById("examInfo").textContent = "Il voto non è disponibile";
 	            return;
 	          }
@@ -194,6 +196,7 @@ function Result(_title,_resultcontainer){
 	
 	this.update = function (examdate,courseid,student){
 		  this.title.textContent = "Course id: " + courseid +"\n" +"Exam date: "+examdate;	
+
 		var matricolaElement = document.getElementById('matricola2');
 		var nameElement = document.getElementById('name2');
 		var surnameElement = document.getElementById('surname2');
@@ -214,18 +217,38 @@ function Result(_title,_resultcontainer){
 		  console.log(student.matricola);
 		  console.log(matricolaElement.textContent);
 		
-		  /*if (student.resultstate === 'PUBBLICATO') {
-		    refuseButton.style.visibility = 'visible';
-		  } else {
-		    refuseButton.style.visibility = 'hidden';
-		  }*/
+		  if (student.resultState === 'PUBBLICATO') {
+		    refuseButton.disabled = false;
+		  } else if (student.resultState === 'RIFIUTATO'){
+			  console.log("Rifiutato");
+		     document.getElementById('refuse').textContent="Il voto è stato rifiutato"
+		  } else if (student.resultState === 'VERBALIZZATO'){
+			  refuseButton.disabled = true;
+		  }
 		
 		  refuseButton.addEventListener('click', function() {
-		    // Codice da eseguire quando il pulsante "Refuse" viene cliccato
+		  	refuse(examdate,courseid); 
 		  });
 		
 	}
 	
+}
+
+refuse = function(examdate,courseid){
+    makeCall("GET", "RefuseMark?courseId="+courseid+"&examDate="+examdate, null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          result.update(examdate,courseid,response);
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          console.log(message);
+        }
+      }
+    });
 }
 
 
@@ -247,6 +270,10 @@ function PageManager(){
     
     result = new Result(document.getElementById("title3"),document.getElementById("examInfo"));
     result.reset();
+    
+     document.querySelector("a[href='Logout']").addEventListener('click', () => {
+	        window.sessionStorage.removeItem('username');
+	      })
   }
 
 }
