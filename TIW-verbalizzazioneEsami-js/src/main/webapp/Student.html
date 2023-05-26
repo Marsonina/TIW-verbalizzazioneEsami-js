@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Student</title>
+<script src="utils.js" charset="utf-8" defer></script>
+<script src="studentPage.js" charset="utf-8" defer></script>
+</head>
+<body>
+	<div id = "userInfo" align="right">
+		<span id="name">BARBARA</span>
+		<span id="surname">LISKOV</span>
+		<span id="matricola">-----</span>
+		<a href = "Logout">Logout</a><br>
+		<span id="role">Student</span>
+	</div>
+	<hr>
+	<h1>Polimi servizi online</h1>
+	<div id ="title1" align="left"></div>
+	<div id ="coursesDates">
+	<table>
+		<tr>
+			<td>
+				<table id="courses_container" border="1">
+					<thead>
+						<tr>
+							<th>Course ID</th>
+							<th>Course Name</th>
+						</tr>
+					</thead>
+					<tbody id ="courses_list">
+					</tbody>
+				</table>
+			</td>
+			<td>
+					
+				<div id="noExams"></div>
+				<div>
+					<form id="goToViewRes" action="#">
+						<span id="title2"></span><br>
+						<select name="examDate">
+							<option id="exams_list">xx</option></select><br>
+						<input id="viewRes" type="button" value="View result">
+					</form>
+				</div>
+			</td>
+		</tr>
+	</table>
+	</div>
+	<div id="title3">
+	</div>
+	<fieldset id="examInfo">
+	<p>
+	Matricola: <span id="matricola"></span>
+	</p>
+	<p>
+	Nome: <span id="name"></span>
+	</p>
+	<p>
+	Cognome: <span id="surname"></span>
+	</p>
+	<p>
+	Degree: <span id="degree"></span>
+	</p>
+	<p>
+	Email: <span id="email"></span>
+	</p>
+	<p>
+	Result: <span id="result"></span>
+	</p>
+	<p>
+	ResultState: <span id="resultstate"></span>
+	</p>
+    <form id="refuse" action="#">
+		<input id="refusebotton" type="button" value="Refuse">
+	</form>
+	</fieldset>
+
+</body>
+</html>
+

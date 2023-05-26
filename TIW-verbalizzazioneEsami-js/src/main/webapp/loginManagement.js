@@ -6,6 +6,7 @@
 
   document.getElementById("loginbutton").addEventListener('click', (e) => {
     var form = e.target.closest("form");
+    console.log("ciao");
     if (form.checkValidity()) {
       makeCall("POST", 'CheckLogin', e.target.closest("form"),
         function(x) {
@@ -14,7 +15,13 @@
             switch (x.status) {
               case 200:
             	sessionStorage.setItem('user', message);
-                window.location.href = "Teacher.html";
+            	var role = JSON.parse(message).role;
+            	console.log(role);
+            	if(role === "teacher"){
+                	window.location.href = "Teacher.html";
+                }else if(role === "student" ){
+					window.location.href = "Student.html";
+				}
                 break;
               case 400: // bad request
                 document.getElementById("errormessage").textContent = message;
