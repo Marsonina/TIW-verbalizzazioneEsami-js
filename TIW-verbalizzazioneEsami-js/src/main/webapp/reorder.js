@@ -1,5 +1,5 @@
 /**
- *SORTING FUNCTIONS
+ *SORTING FUNCTIONS--
  */
 function reorderTable(colonna) {
   var tabella = document.getElementById("examStudents_container");
