@@ -3,6 +3,7 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Teacher</title>
+<link rel="stylesheet" href="mystyle.css">
 <script src="utils.js" charset="utf-8" defer></script>
 <script src="teacherPage.js" charset="utf-8" defer></script>
 <script src="reorder.js" charset="utf-8" defer></script>
@@ -16,9 +17,9 @@
 		<span id="role">Teacher</span>
 	</div>
 	<hr>
-	<h1>Polimi servizi online</h1>
-	<div id ="title1" align="left"></div>
-	<div id ="coursesDates">
+	<h1 id="viewTitle"></h1><br>
+	<div id ="title1" class="title"></div>
+	<div>
 	<table>
 		<tr>
 			<td>
@@ -48,24 +49,67 @@
 		</tr>
 	</table>
 	</div>
-	<div id="noCourses">
-	<span id="title3"></span>
+	
+	<p id="title3" class="title"></p>
+	<div id="noStudents" class ="title"></div>
+	<div class="container" >
 	<table id="examStudents_container" border="1">
 		<thead>
 			<tr>
-				<th>Matricola</th>
-				<th>Name</th>
-				<th>Surname</th>
-				<th>Degree</th>
-				<th>Email</th>
-				<th>Result</th>
+				<th class="sortable">Matricola</th>
+				<th class="sortable">Name</th>
+				<th class="sortable">Surname</th>
+				<th class="sortable">Degree</th>
+				<th class="sortable">Email</th>
+				<th class="sortable">Result</th>
 				<th>ResultState</th>
 				<th>Modify</th>
 			</tr>
 		</thead>
 		<tbody id ="students_list">
 		</tbody>
-	</table>
+	</table><br>
+	<div id = "buttons" class="buttons">
+	<form id="publish" action="#">
+		<input id="publishbutton" type="button" value="Publish">
+	</form><br>
+	<form id="verbalize" action="#">
+		<input id="verbalizebutton" type="button" value="Verbalize">
+	</form><br>
+	<form id="multiplemodify" action="#">
+		<input id="multiplemodifybutton" type="button" value="Multiple modify">
+	</form>
 	</div>
+	</div>
+	
+	<div id="verbalInfo">
+	<fieldset>
+		Verbal code: <span id="code"></span><br>
+		DateTime: <span id="dateTime"></span><br>	
+		Course id: <span id="verbal_course"></span><br>
+		Exam date: <span id="verbal_exam"></span><br>
+		Matricola Teacher: <span id="matricola_teacher"></span><br>	
+	</fieldset>
+	</div>
+	<br>
+	<table>
+		<tr>
+			<td>
+				<table id="verbalcontainer" border="1">
+					<thead>
+						<tr>
+							<th>Matricola</th>
+							<th>Name</th>
+							<th>Surname</th>
+							<th>Result</th>
+						</tr>
+					</thead>
+					<tbody id="verbalstudents">
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</table>
+	<br>
 </body>
 </html>
