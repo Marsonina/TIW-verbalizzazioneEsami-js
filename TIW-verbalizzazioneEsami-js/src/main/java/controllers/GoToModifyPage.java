@@ -53,25 +53,32 @@ public class GoToModifyPage extends HttpServlet {
 			//checking if the selected course is correct and "owned" by the teacher
 			checker.checkTeacherPermissions(chosenCourseId);
 		}catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in courses info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Failure in courses info database extraction");
+			return;
 		}
 		
 		try {
 			//checking if the the exam date is correct
 			checker.checkExamDate(eDao);
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failure in exam info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Failure in exam info database extraction");
+			return;
 		}
 		
 		try {
 			examStudent = eDao.getResult(matricolaExam);
 			//checking if the mark is already published or verbalized
 			if((examStudent.getResultState()).equals("PUBBLICATO")|| (examStudent.getResultState()).equals("VERBALIZZATO")) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Trying to access to a published or verbalized exam");
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().println("Trying to access to a published or a verbalized exam");
 				return;
 			}
 		}catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failure in enrolled students database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Internal server error, please retry later!");
+			return;
 		}
 		
 		Gson gson = new Gson();

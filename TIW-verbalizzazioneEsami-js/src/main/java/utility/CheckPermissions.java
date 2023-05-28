@@ -28,24 +28,26 @@ public class CheckPermissions {
 
 	public void checkTeacherPermissions(int chosenCourseId) throws IOException, SQLException {
 		CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
-		String homePage = request.getServletContext().getContextPath() + "/GoToHomeTeacher";
 			//checking if the selected course exists
 			if(cDao.findCourse() == null) {
-				response.sendRedirect(homePage);
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().println("Failure in exam info database extraction");
 				return;
 			}
 			//checking if the current teacher owns the selected course
 			String currTeacher = cDao.findOwnerTeacher();
 			if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
-				response.sendRedirect(homePage);
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().println("Failure in exam info database extraction");
 				return;
 			}
 		}
 	
 	public void checkExamDate(ExamDAO eDao) throws SQLException, IOException {
-		String homePage = request.getServletContext().getContextPath() + "/GoToHomeTeacher";
 		if(eDao.findExam() == null) {
-			response.sendRedirect(homePage);
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.getWriter().println("Failure in exam info database extraction");
+			return;
 		}
 	}
 }

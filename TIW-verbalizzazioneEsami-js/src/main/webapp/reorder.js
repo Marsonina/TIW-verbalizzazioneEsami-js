@@ -2,6 +2,7 @@
  *SORTING FUNCTIONS--
  */
 function reorderTable(colonna) {
+	console.log("ciao")
   var tabella = document.getElementById("examStudents_container");
   var tbody = tabella.getElementsByTagName("tbody")[0];
   var righe = Array.from(tbody.getElementsByTagName("tr"));
