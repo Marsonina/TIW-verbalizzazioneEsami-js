@@ -171,6 +171,7 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
   this.show = function(courseId, examDate) {
 	coursesList.reset();
 	examsList.reset();
+	
 	this.studentscontainer.style.visibility = "visible";
     var self = this;
     makeCall("GET", "GoToEnrolledStudents?courseId="+courseId+"&"+"examDate="+examDate, null, function(req) {
@@ -186,7 +187,7 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
           }else{
 			  _title.textContent = "Course id: "+courseId+ " Exam date: "+examDate;
 		  }
-          self.update(response);
+          self.update(response, courseId, examDate);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
           window.sessionStorage.removeItem('user');
@@ -197,7 +198,7 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
     });
   };
   
-  this.update = function(arrayStudents) {
+  this.update = function(arrayStudents, courseId, examDate) {
     var tableBody = this.studentslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
 
@@ -236,7 +237,15 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
       var modifyCell = document.createElement("td");
 	  var modifyButton = document.createElement("button");
 	  modifyButton.textContent = "Modify";
+	  if(examStudent.resultState==="PUBBLICATO" || examStudent.resultState==="VERBALIZZATO" || examStudent.resultState==="RIFIUTATO"){
+	  	modifyButton.disabled = true;
+	  }else if(examStudent.resultState==="INSERITO" || examStudent.resultState==="NON INSERITO"){
+	  	modifyButton.disabled = false;
+	  }
+	  modifyButton.value = examStudent.matricola;
 	  modifyButton.addEventListener('click', function() {
+		  var matricola = this.value;
+		  modifyMark.show(courseId, examDate, matricola)
 		  });
       modifyCell.appendChild(modifyButton);
       row.appendChild(modifyCell);
@@ -245,6 +254,95 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
     });
   };
 }
+
+function ModifyMark(_title, _studentContent){
+	this.title = _title
+	this.studentContent = _studentContent;
+	
+	this.reset = function() {
+    this.studentContent.style.visibility = "hidden";
+  };
+  
+  this.show = function(courseid, examdate, matricola){
+		examsList.reset();
+		coursesList.reset();
+		studentsList.reset();
+		 
+		this.studentContent.style.visibility = "visible";
+	    var self = this;
+	    makeCall("GET", "GoToModifyPage?courseId="+courseid+"&examDate="+examdate+"&matricola="+matricola, null, function(req) {
+	      if (req.readyState == 4) {
+	        var message = req.responseText;
+	        if (req.status == 200) {
+	          var response = JSON.parse(req.responseText);
+	          self.update(examdate,courseid,response);
+	        } else if (req.status == 403) {
+	          window.location.href = req.getResponseHeader("Location");
+	          window.sessionStorage.removeItem('user');
+	        } else {
+	          console.log(message);
+	        }
+	      }
+	    });
+	}
+	
+	this.update = function (examdate,courseId,student){	
+		  
+		var matricolaElement = document.getElementById('matricolaStud');
+		var nameElement = document.getElementById('nameStud');
+		var surnameElement = document.getElementById('surnameStud');
+		var degreeElement = document.getElementById('degree');
+		var emailElement = document.getElementById('email');
+		var resultStateElement = document.getElementById('resultState');
+		
+		// Popola i valori dei campi con i dati dello studente
+		matricolaElement.textContent = student.matricola;
+		nameElement.textContent  = student.name;
+		surnameElement.textContent  = student.surname;
+		degreeElement.textContent  = student.degree;
+		emailElement.textContent  = student.email;
+		resultStateElement.textContent  = student.resultState;
+		document.getElementById("modifybutton").addEventListener('click', function(e) {
+		var form = e.target.closest("form");
+    	if (form.checkValidity() && validateFormValues(form)){
+			modify(examdate,courseId,matricolaElement.textContent, form);
+		};	
+		});
+	}
+	}
+	
+	function modify(examdate, courseId, student, form) {
+		console.log(form.examMark.value);
+  	makeCall("POST", "ModifyMark?courseId=" + courseId + "&examDate=" + examdate + "&matricola=" + student, form, function(req) {
+    if (req.readyState == 4) {
+      var message = req.responseText;
+      if (req.status == 200) {
+		  studentsList.show(courseId, examdate);
+		  modifyMark.reset();
+      } else if (req.status == 403) {
+        window.location.href = req.getResponseHeader("Location");
+        window.sessionStorage.removeItem('user');
+      } else {
+        console.log(message);
+      }
+    }
+  });
+}
+	
+	
+
+	validateFormValues = function(form) {
+	  var validOptions = ["18", "19", "20", "21", "22", "23", "24", 
+	  "25", "26", "27", "28", "29", "30", "30L", "ASSENTE", "RIPROVATO"];
+	  var input = form.examMark.value;
+	  console.log(input);
+	  for (var i = 0; i < validOptions.length; i++) {
+	    if (!validOptions.includes(input)) {
+	      return false;
+	    }
+	  }
+	  return true;
+	}
 
 
 //Manage the page
@@ -265,6 +363,9 @@ function PageManager(){
 
     studentsList = new StudentsList (document.getElementById("title3"), document.getElementById("examStudents_container"),document.getElementById("students_list"))
     studentsList.reset();
+    
+    modifyMark = new ModifyMark(document.getElementById("title4"), document.getElementById("modifyMark"));
+    modifyMark.reset();
     
      document.querySelector("a[href='Logout']").addEventListener('click', () => {
         window.sessionStorage.removeItem('username');
