@@ -63,14 +63,14 @@ public class GoToHomeStudent extends HttpServlet {
 				//checking if the selection of the course is correct
 				if(cDao.findCourse() == null) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().println("Try to access to not existing course");
+					response.getWriter().println("Trying to access to not existing course");
 					return;
 				}
 				//checking if the current student is enrolled to the selected course
 				List<String> currStudents = cDao.findAttendingStudent();
 				if(currStudents == null || !currStudents.contains(user.getMatricola())) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().println("Try to access to not attended course");
+					response.getWriter().println("Trying to access to not attended course");
 					return;
 				}
 			}

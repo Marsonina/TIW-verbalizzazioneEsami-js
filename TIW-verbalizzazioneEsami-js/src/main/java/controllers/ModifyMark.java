@@ -69,14 +69,16 @@ public class ModifyMark extends HttpServlet {
 			//checking if the selected course is correct and "owned" by the teacher
 			checker.checkTeacherPermissions(chosenCourseId);
 		}catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in courses info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Failure in courses info database extraction");
 		}
 		
 		try {
 			//checking if the the exam date is correct
 			checker.checkExamDate(eDao);
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in exam info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Failure in exam info database extraction");
 		}
 		
 		//checking if the mark inserted is valid
@@ -90,7 +92,8 @@ public class ModifyMark extends HttpServlet {
 					eDao.changeMark(matricolaSelected, examMark);
 					System.out.println(eDao.getResult(matricolaSelected));				}
 			}catch (SQLException e) {
-				response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in student's exams database extraction");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.getWriter().println("Failure in exam student info database extraction");
 			}
 		
 		String path = "/GoToEnrolledStudents";

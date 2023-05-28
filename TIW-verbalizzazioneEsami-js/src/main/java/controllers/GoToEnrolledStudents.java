@@ -54,21 +54,24 @@ public class GoToEnrolledStudents extends HttpServlet {
 			//checking if the selected course is correct and "owned" by the teacher
 			checker.checkTeacherPermissions(chosenCourseId);
 		}catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in courses info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Failure in courses info database extraction");
 		}
 		
 		try {
 			//checking if the the exam date is correct
 			checker.checkExamDate(eDao);
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in exam info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Failure in exam info database extraction");
 		}
 		
 		try {
 			students = eDao.getStudents();
 		}
 		catch(SQLException e) {
-			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in exam students info database extraction");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Failure in exam students info database extraction");
 		}	
 		
 		Gson gson = new Gson();

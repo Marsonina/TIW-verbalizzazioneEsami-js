@@ -60,7 +60,7 @@ public class ExamResult extends HttpServlet {
 			//checking if the course selected exists
 			if(cDao.findCourse() == null) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().println("Try to access to not existing course");
+				response.getWriter().println("Trying to access to not existing course");
 				return;
 			}
 			//checking if the current student attends the selected course
