@@ -65,6 +65,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 
   this.update = function(arraycourses) {
+    document.getElementById('viewTitle').textContent = "Polimi servizi online";
 	this.title.textContent = "Select a date and choose an exam!"; 
 
     var tableBody = this.courseslist;
@@ -84,6 +85,11 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
       courseLink.addEventListener("click", function() {
+		  var allRows = document.querySelectorAll("tr");
+		  allRows.forEach(function(row) {
+		    row.classList.remove("current");
+		  });
+		 row.classList.add("current");
         examsList.show(course.courseId)
   
       });
@@ -166,6 +172,8 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
 	
 	this.reset = function() {
     this.studentscontainer.style.visibility = "hidden";
+    document.getElementById("buttons").style.visibility = "hidden";
+    this.title.textContent = " ";
   };
   
   this.show = function(courseId, examDate) {
@@ -173,6 +181,7 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
 	examsList.reset();
 	
 	this.studentscontainer.style.visibility = "visible";
+	document.getElementById("buttons").style.visibility = "visible";
     var self = this;
     makeCall("GET", "GoToEnrolledStudents?courseId="+courseId+"&"+"examDate="+examDate, null, function(req) {
       if (req.readyState == 4) {
@@ -181,13 +190,13 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
           var response = JSON.parse(req.responseText);
           console.log(response);
           if (response == null) {
-            _title.textContent = "No enrolled students for this exam!" + " Course id: "+ courseId + " Exam date: "+ examDate;
+             document.getElementById("noStudents").textContent = "No enrolled students for this exam!" + " Course id: "+ courseId + " Exam date: "+ examDate;
             studentsList.reset();
             return;
           }else{
-			  _title.textContent = "Course id: "+courseId+ " Exam date: "+examDate;
+			  document.getElementById("noStudents").textContent = " "
 		  }
-          self.update(response, courseId, examDate);
+          self.update(response,courseId, examDate);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
           window.sessionStorage.removeItem('user');
@@ -198,11 +207,17 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
     });
   };
   
-  this.update = function(arrayStudents, courseId, examDate) {
+  this.update = function(arrayStudents,courseId, examDate) {
+	   document.getElementById('viewTitle').textContent = "Enrolled students for the selected exam"
+	this.title.textContent = "Course id: "+courseId+ " Exam date: "+examDate;
     var tableBody = this.studentslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
+	var topublish = true;
+	var toverbalize = true;
+	var tomodify = true;
+	
+    arrayStudents.forEach(function(examStudent) { 
 
-    arrayStudents.forEach(function(examStudent) {  
       var row = document.createElement("tr");
       
      var matricolaCell = document.createElement("td");
@@ -251,7 +266,39 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
       row.appendChild(modifyCell);
 
   	  tableBody.appendChild(row);
+  	  
+	  	if(examStudent.resultState === "INSERITO"){
+			topublish = false;
+			row.classList.add("inserito");
+		} 
+		if(examStudent.resultState === "PUBBLICATO"){
+			toverbalize = false;
+			row.classList.add("pubblicato");
+		}
+		if(examStudent.resultState === "NON INSERITO"){
+			tomodify = false;
+			row.classList.add("noninserito");
+		}
+		if(examStudent.resultState === "VERBALIZZATO"){
+			row.classList.add("verbalizzato");
+		}if(examStudent.resultState === "RIFIUTATO"){
+			toverbalize = false;
+		}
+  	  
     });
+    
+      document.getElementById("publishbutton").disabled = topublish;	  
+  	  document.getElementById("publishbutton").addEventListener("click", function() {
+		Publish(courseId, examDate);
+      });
+      document.getElementById("verbalizebutton").disabled = toverbalize;	
+      document.getElementById("verbalizebutton").addEventListener("click", function() {
+		verbal.show(courseId, examDate);
+      });
+      document.getElementById("multiplemodifybutton").disabled = tomodify;	
+      document.getElementById("multiplemodifybutton").addEventListener("click", function() {
+      });
+      
   };
 }
 
@@ -344,6 +391,104 @@ function ModifyMark(_title, _studentContent){
 	  return true;
 	}
 
+function Publish(courseId, examDate){
+	makeCall("GET", "PublishResults?courseId="+courseId+"&examDate="+examDate, null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          studentsList.update(response, courseId, examDate);
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          console.log(message);
+        }
+      }
+    });
+}
+
+function Verbal(_title, _verbalcontainer, _verbalstudents){
+	this.title= _title;
+	this.verbalcontainer = _verbalcontainer;
+	this.verbalstudents = _verbalstudents
+	
+	this.reset = function() {
+		this.verbalcontainer.style.visibility = "hidden";
+		this.title.style.visibility = "hidden";
+	}	
+	
+	this.show = function(courseId, examDate){
+		studentsList.reset();
+		this.verbalcontainer.style.visibility = "visible";
+		this.title.style.visibility = "visible";
+    	var self = this;
+	  makeCall("GET", "VerbalizeResults?courseId="+courseId+"&examDate="+examDate, null, function(req) {
+      if (req.readyState == 4) {
+        var message = req.responseText;
+        if (req.status == 200) {
+          var response = JSON.parse(req.responseText);
+          var info = JSON.parse(response.verbal);
+          var stud = JSON.parse(response.sudents);
+          console.log(info);
+          console.log(stud);
+          self.update(info,stud,courseId, examDate)
+          
+        } else if (req.status == 403) {
+          window.location.href = req.getResponseHeader("Location");
+          window.sessionStorage.removeItem('user');
+        } else {
+          console.log(message);
+        }
+      }
+    });
+	}
+	
+	this.update = function(info,stud,courseId, examDate){
+		 document.getElementById('viewTitle').textContent = " Verbal "
+		var tableBody = this.verbalstudents;
+    	tableBody.innerHTML = ""; // Svuota il corpo della tabella
+    	var codeElement = document.getElementById('code');
+		var dateTimeElement = document.getElementById('dateTime');
+		var verbalCourseElement = document.getElementById('verbal_course');
+		var verbalExamElement = document.getElementById('verbal_exam');
+		var matricolaTeacherElement = document.getElementById('matricola_teacher');
+		
+		// Popola i valori dei campi con i dati dello studente
+		codeElement.textContent = info.verbalId;
+		dateTimeElement.textContent  = info.dateTime;
+		verbalCourseElement.textContent  = courseId;
+		verbalExamElement.textContent  = examDate;
+		matricolaTeacherElement.textContent  = info.matricolaTeacher;
+    
+
+    stud.forEach(function(examStudent) { 
+
+	  var riga = document.createElement("tr");
+	      
+	    var cellaMatricola = document.createElement("td");
+	    cellaMatricola.textContent = examStudent.matricola;
+	    riga.appendChild(cellaMatricola);
+	
+	    var cellaNome = document.createElement("td");
+	    cellaNome.textContent = examStudent.name;
+	    riga.appendChild(cellaNome);
+	
+	    var cellaCognome = document.createElement("td");
+	    cellaCognome.textContent = examStudent.surname;
+	    riga.appendChild(cellaCognome);
+	      
+	    var cellaRisultato = document.createElement("td");
+	    cellaRisultato.textContent = examStudent.result;
+	    riga.appendChild(cellaRisultato);
+	
+	    tableBody.appendChild(riga);
+    });
+		
+	}
+	
+}
+
 
 //Manage the page
 function PageManager(){
@@ -366,6 +511,9 @@ function PageManager(){
     
     modifyMark = new ModifyMark(document.getElementById("title4"), document.getElementById("modifyMark"));
     modifyMark.reset();
+
+    verbal = new Verbal(document.getElementById("verbalInfo"), document.getElementById("verbalcontainer"), document.getElementById("verbalstudents"))
+    verbal.reset();
     
      document.querySelector("a[href='Logout']").addEventListener('click', () => {
         window.sessionStorage.removeItem('username');

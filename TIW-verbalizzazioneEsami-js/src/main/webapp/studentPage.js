@@ -64,6 +64,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 
   this.update = function(arraycourses) {
+	  document.getElementById('viewTitle').textContent = " Polimi servizi online "
 	this.title.textContent = "Select a date and choose an exam!"; 
 
     var tableBody = this.courseslist;
@@ -82,7 +83,12 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       var courseLink = document.createElement("a");
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
-      courseLink.addEventListener("click", function() {
+     courseLink.addEventListener("click", function() {
+		  var allRows = document.querySelectorAll("tr");
+		  allRows.forEach(function(row) {
+		    row.classList.remove("current");
+		  });
+		 row.classList.add("current");
         examsList.show(course.courseId)
   
       });
@@ -195,6 +201,7 @@ function Result(_title,_resultcontainer){
 	}
 	
 	this.update = function (examdate,courseid,student){
+		document.getElementById('viewTitle').textContent = " Exam result "
 		  this.title.textContent = "Course id: " + courseid +"\n" +"Exam date: "+examdate;	
 
 		var matricolaElement = document.getElementById('matricola2');

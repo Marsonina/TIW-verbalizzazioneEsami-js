@@ -6,9 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import beans.ExamStudent;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import beans.Exam;
@@ -149,7 +152,15 @@ public class ExamDAO {
 	    try (PreparedStatement pstatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 	        pstatement.setString(1, chosenDate);
 	        pstatement.setInt(2, courseId);
-	        pstatement.setTimestamp(3, Timestamp.valueOf(verbal.getDateTime()));
+	        //pstatement.setTimestamp(3, Timestamp.valueOf(verbal.getDateTime()));
+	        //Date date = verbal.getDateTime();
+	        //LocalDateTime dateTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+
+	        // Converti LocalDateTime in Timestamp
+	        //Timestamp timestamp = Timestamp.valueOf(dateTime);
+	        //Timestamp timestamp = new Timestamp(date.getTime());
+
+	        pstatement.setTimestamp(3, verbal.getDateTime());
 	        pstatement.setString(4, verbal.getMatricolaTeacher());
 	        pstatement.executeUpdate();
 	        

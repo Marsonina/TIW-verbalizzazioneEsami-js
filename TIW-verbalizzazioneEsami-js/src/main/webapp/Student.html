@@ -3,6 +3,7 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Student</title>
+<link rel="stylesheet" href="mystyle.css">
 <script src="utils.js" charset="utf-8" defer></script>
 <script src="studentPage.js" charset="utf-8" defer></script>
 </head>
@@ -15,9 +16,9 @@
 		<span id="role">Student</span>
 	</div>
 	<hr>
-	<h1>Polimi servizi online</h1>
-	<div id ="title1" align="left"></div>
-	<div id ="coursesDates">
+	<h1 id="viewTitle"></h1>
+	<div id ="title1" class ="title"></div>
+	<div>
 	<table>
 		<tr>
 			<td>
@@ -47,9 +48,10 @@
 		</tr>
 	</table>
 	</div>
-	<div id="title3">
+	<div id="title3" class="title">
 	</div>
-	<fieldset id="examInfo">
+	<div class = "container2">
+	<fieldset id="examInfo" >
 	<p>
 	Matricola: <span id="matricola2"></span>
 	</p>
@@ -75,7 +77,7 @@
 		<input id="refusebotton" type="button" value="Refuse">
 	</form>
 	</fieldset>
-
+	</div>
 </body>
 </html>
 
