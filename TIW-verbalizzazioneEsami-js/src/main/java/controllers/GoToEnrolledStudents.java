@@ -56,6 +56,7 @@ public class GoToEnrolledStudents extends HttpServlet {
 		}catch (SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Failure in courses info database extraction");
+			return;
 		}
 		
 		try {
@@ -64,6 +65,7 @@ public class GoToEnrolledStudents extends HttpServlet {
 		} catch (SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Failure in exam info database extraction");
+			return;
 		}
 		
 		try {
@@ -72,6 +74,7 @@ public class GoToEnrolledStudents extends HttpServlet {
 		catch(SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Failure in exam students info database extraction");
+			return;
 		}	
 		
 		Gson gson = new Gson();
