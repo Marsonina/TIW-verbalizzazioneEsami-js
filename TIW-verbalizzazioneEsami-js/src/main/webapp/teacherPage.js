@@ -42,12 +42,17 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 
   this.show = function() {
+	this.coursescontainer.style.visibility = "visible";
+	studentsList.reset();
+	verbal.reset();
+	examsList.reset();  
     var self = this;
     makeCall("GET", "GoToHomeTeacher", null, function(req) {
       if (req.readyState == 4) {
         var message = req.responseText;
         if (req.status == 200) {
           var response = JSON.parse(req.responseText);
+          console.log(response);
           var coursesToShow = JSON.parse(response.courses);
           if (coursesToShow.length == 0) {
             self.courseslist.textContent = "No courses!";
@@ -70,7 +75,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
 
     var tableBody = this.courseslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
-
+	console.log(arraycourses);
     arraycourses.forEach(function(course) {  
       var row = document.createElement("tr");
 
@@ -111,6 +116,7 @@ function ExamsList(_title, _examslist){
   };
 
   this.show = function(courseId) {
+	document.getElementById("noExams").textContent = " ";  
 	this.examslist.style.visibility = "visible"; 
     var self = this;
     makeCall("GET", "GoToHomeTeacher?courseId="+courseId, null, function(req) {
@@ -177,11 +183,12 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
   };
   
   this.show = function(courseId, examDate) {
+	 document.getElementById("noStudents").textContent = " ";   
+	var self = this;  
 	coursesList.reset();
 	examsList.reset();
 	this.studentscontainer.style.visibility = "visible";
 	document.getElementById("buttons").style.visibility = "visible";
-    var self = this;
     makeCall("GET", "GoToEnrolledStudents?courseId="+courseId+"&"+"examDate="+examDate, null, function(req) {
       if (req.readyState == 4) {
         var message = req.responseText;
@@ -321,10 +328,10 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
 	}	
 	
 	this.show = function(courseId, examDate){
+		var self = this;
 		studentsList.reset();
 		this.verbalcontainer.style.visibility = "visible";
 		this.title.style.visibility = "visible";
-    	var self = this;
 	  makeCall("GET", "VerbalizeResults?courseId="+courseId+"&examDate="+examDate, null, function(req) {
       if (req.readyState == 4) {
         var message = req.responseText;
@@ -404,8 +411,7 @@ function PageManager(){
     
     coursesList = new CoursesList(document.getElementById("title1"),
     document.getElementById("courses_container"),document.getElementById("courses_list"));
-    coursesList.show();
-    
+   
     examsList = new ExamsList(document.getElementById("title2"),document.getElementById("goToViewRes"));
     examsList.reset();
 
@@ -415,9 +421,21 @@ function PageManager(){
     verbal = new Verbal(document.getElementById("verbalInfo"), document.getElementById("verbalcontainer"), document.getElementById("verbalstudents"))
     verbal.reset();
     
+    coursesList.show();
+    
      document.querySelector("a[href='Logout']").addEventListener('click', () => {
         window.sessionStorage.removeItem('username');
       })
+      
+     document.getElementById("homePage").addEventListener('click', function() {
+		coursesList.show();
+      });
+
+	document.getElementById("enrolledPage").addEventListener('click', function() {
+		studentsList.show();
+      });
+
+      
     
   }
 }

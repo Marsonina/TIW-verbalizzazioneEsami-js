@@ -54,8 +54,8 @@ public class PublishResults extends HttpServlet {
 			//checking if the current teacher owns the selected course
 			String currTeacher = cDao.findOwnerTeacher();
 			if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				response.getWriter().println("Internal server error, retry later");
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().println("Try to access to not attended exam");
 				return;
 			}
 		} catch (SQLException e) {

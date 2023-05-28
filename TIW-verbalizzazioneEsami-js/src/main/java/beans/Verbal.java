@@ -2,8 +2,6 @@ package beans;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 public class Verbal {
 	private int verbalId = 0;
