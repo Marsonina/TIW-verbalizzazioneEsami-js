@@ -179,6 +179,7 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
   this.show = function(courseId, examDate) {
 	coursesList.reset();
 	examsList.reset();
+	multipleModify.reset();
 	
 	this.studentscontainer.style.visibility = "visible";
 	document.getElementById("buttons").style.visibility = "visible";
@@ -188,7 +189,6 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
         var message = req.responseText;
         if (req.status == 200) {
           var response = JSON.parse(req.responseText);
-          console.log(response);
           if (response == null) {
              document.getElementById("noStudents").textContent = "No enrolled students for this exam!" + " Course id: "+ courseId + " Exam date: "+ examDate;
             studentsList.reset();
@@ -297,6 +297,7 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
       });
       document.getElementById("multiplemodifybutton").disabled = tomodify;	
       document.getElementById("multiplemodifybutton").addEventListener("click", function() {
+		  multipleModify.show(courseId, examDate, arrayStudents);
       });
       
   };
@@ -317,7 +318,11 @@ function ModifyMark(_title, _studentContent){
 		 
 		this.studentContent.style.visibility = "visible";
 	    var self = this;
-	    makeCall("GET", "GoToModifyPage?courseId="+courseid+"&examDate="+examdate+"&matricola="+matricola, null, function(req) {
+	    var matricolaArray = new Array();
+	    matricolaArray.push(matricola);
+	    var json = JSON.stringify(matricolaArray);
+		var studentParameter = encodeURIComponent(json);
+	    makeCall("GET", "GoToModifyPage?courseId="+courseid+"&examDate="+examdate+"&matricola="+studentParameter, null, function(req) {
 	      if (req.readyState == 4) {
 	        var message = req.responseText;
 	        if (req.status == 200) {
@@ -333,8 +338,10 @@ function ModifyMark(_title, _studentContent){
 	    });
 	}
 	
-	this.update = function (examdate,courseId,student){	
-		  
+	this.update = function (examdate,courseId,arrayStudents){	
+		
+		document.getElementById('viewTitle').textContent = "Modify mark" 
+		this.title.textContent ="Enter the mark and press 'Modify' !" 
 		var matricolaElement = document.getElementById('matricolaStud');
 		var nameElement = document.getElementById('nameStud');
 		var surnameElement = document.getElementById('surnameStud');
@@ -342,6 +349,8 @@ function ModifyMark(_title, _studentContent){
 		var emailElement = document.getElementById('email');
 		var resultStateElement = document.getElementById('resultState');
 		
+		
+		arrayStudents.forEach(function(student){
 		// Popola i valori dei campi con i dati dello studente
 		matricolaElement.textContent = student.matricola;
 		nameElement.textContent  = student.name;
@@ -349,18 +358,33 @@ function ModifyMark(_title, _studentContent){
 		degreeElement.textContent  = student.degree;
 		emailElement.textContent  = student.email;
 		resultStateElement.textContent  = student.resultState;
+		
+		var form = document.getElementById("singleModifyForm");
+		var matricolaHidden = document.createElement('input');
+	    matricolaHidden.setAttribute("type", "hidden");
+	    matricolaHidden.setAttribute("name", "matricole"); // Utilizza "[]" per indicare che è un array di valori
+	    matricolaHidden.value = student.matricola;
+	    form.appendChild(matricolaHidden);
+	    
+	    });
+    
 		document.getElementById("modifybutton").addEventListener('click', function(e) {
 		var form = e.target.closest("form");
-    	if (form.checkValidity() && validateFormValues(form)){
-			modify(examdate,courseId,matricolaElement.textContent, form);
-		};	
+		var input = form.examMark.value;
+		if (form.checkValidity() && validateFormValues(input)) {
+		  modify(examdate, courseId, form);
+		  var child = form.querySelector("[name='matricole']");
+		  if (child) {
+		    child.remove();
+		  }
+		}
 		});
-	}
-	}
+
+		}
+		}
 	
-	function modify(examdate, courseId, student, form) {
-		console.log(form.examMark.value);
-  	makeCall("POST", "ModifyMark?courseId=" + courseId + "&examDate=" + examdate + "&matricola=" + student, form, function(req) {
+	function modify(examdate, courseId, form) {
+  	makeCall("POST", "ModifyMark?courseId=" + courseId + "&examDate=" + examdate, form, function(req) {
     if (req.readyState == 4) {
       var message = req.responseText;
       if (req.status == 200) {
@@ -375,13 +399,10 @@ function ModifyMark(_title, _studentContent){
     }
   });
 }
-	
-	
 
-	validateFormValues = function(form) {
+	validateFormValues = function(input) {
 	  var validOptions = ["18", "19", "20", "21", "22", "23", "24", 
 	  "25", "26", "27", "28", "29", "30", "30L", "ASSENTE", "RIPROVATO"];
-	  var input = form.examMark.value;
 	  console.log(input);
 	  for (var i = 0; i < validOptions.length; i++) {
 	    if (!validOptions.includes(input)) {
@@ -411,7 +432,7 @@ function Publish(courseId, examDate){
 function Verbal(_title, _verbalcontainer, _verbalstudents){
 	this.title= _title;
 	this.verbalcontainer = _verbalcontainer;
-	this.verbalstudents = _verbalstudents
+	this.verbalstudents = _verbalstudents;
 	
 	this.reset = function() {
 		this.verbalcontainer.style.visibility = "hidden";
@@ -486,38 +507,177 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
     });
 		
 	}
+}
 	
+	function MultipleModify(_modifycontainer, _modifystudents){
+		this.modifycontainer = _modifycontainer;
+		this.modifystudents = _modifystudents;
+		
+		this.reset = function() {
+		this.modifycontainer.style.visibility = "hidden";
+		document.getElementById("multipleModify").style.visibility = "hidden";
+		}
+	
+		this.show = function(courseId, examDate, examStudents) {
+		coursesList.reset();
+		examsList.reset();
+		studentsList.reset();
+		this.modifycontainer.style.visibility = "visible";
+		document.getElementById("multipleModify").style.visibility = "visible";
+		
+	    var self = this;
+	    var studentsToModify = new Array();
+	    examStudents.forEach(function(examStudent) { 
+			if(examStudent.resultState ==="NON INSERITO")
+			studentsToModify.push(examStudent.matricola);
+		});
+		var json = JSON.stringify(studentsToModify);
+		var studentsParameter = encodeURIComponent(json);
+	    makeCall("GET", "GoToModifyPage?courseId="+courseId+"&"+"examDate="+examDate+"&matricola="+studentsParameter, null, function(req) {
+	     if (req.readyState == 4) {
+	        var message = req.responseText;
+	        if (req.status == 200) {
+			  var response = JSON.parse(req.responseText);
+	          self.update(courseId, examDate, response);
+	        } else if (req.status == 403) {
+	          window.location.href = req.getResponseHeader("Location");
+	          window.sessionStorage.removeItem('user');
+	        } else {
+	          console.log(message);
+	        }
+	      }
+	    });
+	 };
+	 
+this.update = function(courseId, examDate, arrayStudents) {
+	
+  var form = document.getElementById("resultForm");
+  var tableBody = this.modifystudents;
+  
+  var matricole = new Array();
+
+  arrayStudents.forEach(function(examStudent) {
+    var row = document.createElement("tr");
+    matricole.push(examStudent.matricola);
+
+    var matricolaCell = document.createElement("td");
+    matricolaCell.textContent = examStudent.matricola;
+    row.appendChild(matricolaCell);
+
+    var nameCell = document.createElement("td");
+    nameCell.textContent = examStudent.name;
+    row.appendChild(nameCell);
+
+    var surnameCell = document.createElement("td");
+    surnameCell.textContent = examStudent.surname;
+    row.appendChild(surnameCell);
+
+    var emailCell = document.createElement("td");
+    emailCell.textContent = examStudent.email;
+    row.appendChild(emailCell);
+
+    var degreeCell = document.createElement("td");
+    degreeCell.textContent = examStudent.degree;
+    row.appendChild(degreeCell);
+
+    var resultCell = document.createElement("td");  
+	var input = document.createElement('input');
+	input.setAttribute('type', 'text');
+    input.setAttribute('name', 'examMark');
+    form.appendChild(input);
+    resultCell.appendChild(input);
+    row.appendChild(resultCell);
+    
+
+    var resultStateCell = document.createElement("td");
+    resultStateCell.textContent = examStudent.resultState;
+    row.appendChild(resultStateCell);
+  
+    
+    var matricolaHidden = document.createElement('input');
+    matricolaHidden.setAttribute("type", "hidden");
+    matricolaHidden.setAttribute("name", "matricole"); // Utilizza "[]" per indicare che è un array di valori
+    matricolaHidden.value = examStudent.matricola;
+    form.appendChild(matricolaHidden);
+    row.appendChild(matricolaHidden);
+
+    tableBody.appendChild(row);
+    console.log(form.value);
+  });
+	
+	
+  	modifyButton = document.getElementById("modifyAllbutton");
+  	modifyButton.addEventListener("click", function(e) {
+	var form = e.target.closest("form");
+	console.log(form);
+    if (form.checkValidity()){
+		var resultInputs = document.querySelectorAll("td input[name='examMark']");
+		var results = [];
+		var formOkay = true;
+		resultInputs.forEach(function(input) {
+			console.log(input)
+		if(validateFormValues(input.value))
+      		results.push(input.value);
+      	else 
+      		formOkay = false;
+    	});
+    	if(formOkay)
+    		modify(examDate, courseId, form);	
+	}
+    });
+
+	function modify(examdate, courseId, form) {
+		console.log(form.value)
+  		makeCall("POST", "ModifyMark?courseId=" + courseId + "&examDate=" + examdate, form, function(req) {
+    	if (req.readyState == 4) {
+      		var message = req.responseText;
+      	if (req.status == 200) {
+		  studentsList.show(courseId, examdate);
+		  multipleModify.reset();
+      	} else if (req.status == 403) {
+        window.location.href = req.getResponseHeader("Location");
+        window.sessionStorage.removeItem('user');
+      	} else {
+        console.log(message);
+      	}
+    }
+  });
+
+};
+}
 }
 
 
 //Manage the page
-function PageManager(){
+function PageManager() {
   var info = document.getElementById("userInfo");
 
-  this.start = function(){
+  this.start = function() {
     var user = JSON.parse(sessionStorage.getItem("user"));
     userInfo = new UserInfo(user, info);
     userInfo.show();
-    
+
     coursesList = new CoursesList(document.getElementById("title1"),
-    document.getElementById("courses_container"),document.getElementById("courses_list"));
+      document.getElementById("courses_container"), document.getElementById("courses_list"));
     coursesList.show();
-    
-    examsList = new ExamsList(document.getElementById("title2"),document.getElementById("goToViewRes"));
+
+    examsList = new ExamsList(document.getElementById("title2"), document.getElementById("goToViewRes"));
     examsList.reset();
 
-    studentsList = new StudentsList (document.getElementById("title3"), document.getElementById("examStudents_container"),document.getElementById("students_list"))
+    studentsList = new StudentsList(document.getElementById("title3"), document.getElementById("examStudents_container"), document.getElementById("students_list"));
     studentsList.reset();
-    
+
     modifyMark = new ModifyMark(document.getElementById("title4"), document.getElementById("modifyMark"));
     modifyMark.reset();
 
-    verbal = new Verbal(document.getElementById("verbalInfo"), document.getElementById("verbalcontainer"), document.getElementById("verbalstudents"))
+    verbal = new Verbal(document.getElementById("verbalInfo"), document.getElementById("verbalcontainer"), document.getElementById("verbalstudents"));
     verbal.reset();
-    
-     document.querySelector("a[href='Logout']").addEventListener('click', () => {
-        window.sessionStorage.removeItem('username');
-      })
-    
-  }
+
+    multipleModify = new MultipleModify(document.getElementById("changeMark_container"), document.getElementById("changeMark_list"));
+    multipleModify.reset();
+
+    document.querySelector("a[href='Logout']").addEventListener('click', () => {
+      window.sessionStorage.removeItem('username');
+    });
+  }
 }

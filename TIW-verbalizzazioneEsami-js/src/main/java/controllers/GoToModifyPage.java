@@ -3,6 +3,9 @@ package controllers;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -42,7 +45,10 @@ public class GoToModifyPage extends HttpServlet {
 		String chosenCourse = request.getParameter("courseId");
 		int chosenCourseId = Integer.parseInt(chosenCourse);
 		String chosenExam = request.getParameter("examDate");
-		String matricolaExam = request.getParameter("matricola");
+		String arrayStudents = request.getParameter("matricola");
+	
+		Gson gson = new Gson();
+		List<String> matricoleExam = new ArrayList<>(Arrays.asList(gson.fromJson(arrayStudents, String[].class)));
 		
 		ExamDAO eDao = new ExamDAO(connection, chosenCourseId, chosenExam);
 		ExamStudent examStudent = new ExamStudent();
@@ -67,23 +73,25 @@ public class GoToModifyPage extends HttpServlet {
 			return;
 		}
 		
-		try {
-			examStudent = eDao.getResult(matricolaExam);
+		List<ExamStudent> examStudents = new ArrayList<>();
+		for(String matricola: matricoleExam) {
+			try {
+				examStudent = eDao.getResult(matricola);
+			}catch (SQLException e) {
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.getWriter().println("Internal server error, please retry later!");
+				return;
+			}
 			//checking if the mark is already published or verbalized
 			if((examStudent.getResultState()).equals("PUBBLICATO")|| (examStudent.getResultState()).equals("VERBALIZZATO")) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				response.getWriter().println("Trying to access to a published or a verbalized exam");
 				return;
 			}
-		}catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Internal server error, please retry later!");
-			return;
+			examStudents.add(examStudent);
 		}
-		
-		Gson gson = new Gson();
 
-		String jsonString = gson.toJson(examStudent);
+		String jsonString = gson.toJson(examStudents);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(jsonString);

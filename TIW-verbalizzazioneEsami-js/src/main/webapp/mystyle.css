@@ -12,6 +12,12 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.container3{
+  position: fixed;
+  bottom: 0;
+}
+
 th.sortable {
 	cursor: pointer;
 }
@@ -25,6 +31,7 @@ th.sortable {
   left: 130%;
   transform: translate(-50%, -50%);
 }
+
 
 .current {background-color: #ffa6a6;}
 .noninserito {background-color: #e2e2e2;}

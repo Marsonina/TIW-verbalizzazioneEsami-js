@@ -80,8 +80,9 @@
 		<input id="multiplemodifybutton" type="button" value="Multiple modify">
 	</form>
 	</div>
+	</div>
 	
-	<div id="title4">
+	<div id="title4"></div>
 	<fieldset id="modifyMark">
 		<p>
 		Matricola: <span id="matricolaStud">123456</span>
@@ -101,14 +102,13 @@
 		<p>
 		ResultState: <span id="resultState">PUBBLICATO</span>
 		</p>
-		<form>
+		<form id="singleModifyForm">
 		Result: <input type="text" name="examMark" required>
 		<input id="modifybutton" type="button" value="Modify">
 		<br>
 		</form>	
 	</fieldset>
-	</div>
-	</div>
+	
 	
 	<div id="verbalInfo">
 	<fieldset>
@@ -139,5 +139,25 @@
 		</tr>
 	</table>
 	<br>
+	<div class="container3" id="multipleModify">
+	<form id="resultForm">
+	<table id="changeMark_container" border="1">
+		<thead>
+		<tr>
+			<th>Matricola</th>
+			<th>Name</th>
+			<th>Surname</th>
+			<th>Degree</th>
+			<th>Email</th>
+			<th>Result</th>
+			<th>ResultState</th>
+		</tr>
+		</thead>
+		<tbody id ="changeMark_list">
+		</tbody>
+	</table><br>
+	<input id="modifyAllbutton" type="button" value="Modify All">
+	</form>
+	</div>
 </body>
 </html>

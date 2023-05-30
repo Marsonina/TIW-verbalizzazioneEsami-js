@@ -75,7 +75,7 @@ public class GoToEnrolledStudents extends HttpServlet {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Failure in exam students info database extraction");
 			return;
-		}	
+		}
 		
 		Gson gson = new Gson();
 
