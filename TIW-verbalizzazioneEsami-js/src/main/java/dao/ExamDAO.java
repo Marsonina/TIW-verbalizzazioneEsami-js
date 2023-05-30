@@ -49,7 +49,7 @@ public class ExamDAO {
 		return examStudent;	
 	}
 	
-	//method that that returns studets enrolled to an exam ordered by the order specified by the user
+	//method that that returns studets enrolled to an exam 
 	public List<ExamStudent> getStudents() throws SQLException {
 	    List<ExamStudent> users = new ArrayList<ExamStudent>();
 	    String query = "SELECT student.matricola, student.name, student.surname, student.degree, student.email, exam_students.result, exam_students.resultState "
@@ -222,6 +222,4 @@ public class ExamDAO {
 		}
 		return users;
 	}
-	
-	
 }

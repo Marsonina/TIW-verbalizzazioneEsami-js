@@ -84,6 +84,7 @@
 	</form>
 	</div>
 	</div>
+	
 	<div id="title4" class = "title"></div>
 	<fieldset id="modifyMark" class = "container2">
 		<p>
@@ -104,7 +105,7 @@
 		<p>
 		ResultState: <span id="resultState">PUBBLICATO</span>
 		</p>
-		<form>
+		<form id="singleModifyForm">
 		Result: <input type="text" name="examMark" required>
 		<input id="modifybutton" type="button" value="Modify">
 		<br>
@@ -141,5 +142,25 @@
 		</tr>
 	</table>
 	<br>
+	<div class="container3" id="multipleModify">
+	<form id="resultForm">
+	<table id="changeMark_container" border="1">
+		<thead>
+		<tr>
+			<th>Matricola</th>
+			<th>Name</th>
+			<th>Surname</th>
+			<th>Degree</th>
+			<th>Email</th>
+			<th>Result</th>
+			<th>ResultState</th>
+		</tr>
+		</thead>
+		<tbody id ="changeMark_list">
+		</tbody>
+	</table><br>
+	<input id="modifyAllbutton" type="button" value="Modify All">
+	</form>
+	</div>
 </body>
 </html>
