@@ -8,8 +8,8 @@ window.addEventListener("load", ()=>{
 	if(sessionStorage.getItem("user") == null){
 		window.location.href = "index.html";
 	} else {
+		pageManager.refresh();
 		pageManager.start();
-		//pageManager.refresh();
 	}
 },false);
 
@@ -42,12 +42,15 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 
   this.show = function() {
+	  pageManager.refresh();
+	this.coursescontainer.style.visibility = "visible";  
     var self = this;
     makeCall("GET", "GoToHomeTeacher", null, function(req) {
       if (req.readyState == 4) {
         var message = req.responseText;
         if (req.status == 200) {
           var response = JSON.parse(req.responseText);
+          console.log(response);
           var coursesToShow = JSON.parse(response.courses);
           if (coursesToShow.length == 0) {
             self.courseslist.textContent = "No courses!";
@@ -70,7 +73,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
 
     var tableBody = this.courseslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
-
+	console.log(arraycourses);
     arraycourses.forEach(function(course) {  
       var row = document.createElement("tr");
 
@@ -111,6 +114,7 @@ function ExamsList(_title, _examslist){
   };
 
   this.show = function(courseId) {
+	document.getElementById("noExams").textContent = " ";  
 	this.examslist.style.visibility = "visible"; 
     var self = this;
     makeCall("GET", "GoToHomeTeacher?courseId="+courseId, null, function(req) {
@@ -177,13 +181,14 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
   };
   
   this.show = function(courseId, examDate) {
-	coursesList.reset();
-	examsList.reset();
-	multipleModify.reset();
+	  pageManager.refresh();
+	  pageManager.returnHome();
+	  
+	 document.getElementById("noStudents").textContent = " ";   
+	 var self = this;
 	
 	this.studentscontainer.style.visibility = "visible";
 	document.getElementById("buttons").style.visibility = "visible";
-    var self = this;
     makeCall("GET", "GoToEnrolledStudents?courseId="+courseId+"&"+"examDate="+examDate, null, function(req) {
       if (req.readyState == 4) {
         var message = req.responseText;
@@ -309,13 +314,12 @@ function ModifyMark(_title, _studentContent){
 	
 	this.reset = function() {
     this.studentContent.style.visibility = "hidden";
+    this.title.textContent = " ";
   };
   
   this.show = function(courseid, examdate, matricola){
-		examsList.reset();
-		coursesList.reset();
-		studentsList.reset();
-		 
+		pageManager.refresh();
+		 pageManager.returnStudents(courseid, examdate);
 		this.studentContent.style.visibility = "visible";
 	    var self = this;
 	    var matricolaArray = new Array();
@@ -337,9 +341,8 @@ function ModifyMark(_title, _studentContent){
 	      }
 	    });
 	}
-	
+
 	this.update = function (examdate,courseId,arrayStudents){	
-		
 		document.getElementById('viewTitle').textContent = "Modify mark" 
 		this.title.textContent ="Enter the mark and press 'Modify' !" 
 		var matricolaElement = document.getElementById('matricolaStud');
@@ -440,10 +443,11 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
 	}	
 	
 	this.show = function(courseId, examDate){
-		studentsList.reset();
+		pageManager.refresh();
+		pageManager.returnStudents(courseId, examDate);
+		var self = this;
 		this.verbalcontainer.style.visibility = "visible";
 		this.title.style.visibility = "visible";
-    	var self = this;
 	  makeCall("GET", "VerbalizeResults?courseId="+courseId+"&examDate="+examDate, null, function(req) {
       if (req.readyState == 4) {
         var message = req.responseText;
@@ -649,35 +653,71 @@ this.update = function(courseId, examDate, arrayStudents) {
 
 
 //Manage the page
-function PageManager() {
+function PageManager(){
   var info = document.getElementById("userInfo");
 
-  this.start = function() {
+ 
     var user = JSON.parse(sessionStorage.getItem("user"));
+    
     userInfo = new UserInfo(user, info);
-    userInfo.show();
 
     coursesList = new CoursesList(document.getElementById("title1"),
-      document.getElementById("courses_container"), document.getElementById("courses_list"));
-    coursesList.show();
+    document.getElementById("courses_container"),document.getElementById("courses_list"));
+    
+    
+    examsList = new ExamsList(document.getElementById("title2"),document.getElementById("goToViewRes"));
+   
 
-    examsList = new ExamsList(document.getElementById("title2"), document.getElementById("goToViewRes"));
-    examsList.reset();
-
-    studentsList = new StudentsList(document.getElementById("title3"), document.getElementById("examStudents_container"), document.getElementById("students_list"));
-    studentsList.reset();
-
+    studentsList = new StudentsList (document.getElementById("title3"), document.getElementById("examStudents_container"),document.getElementById("students_list"))
+   
+    
     modifyMark = new ModifyMark(document.getElementById("title4"), document.getElementById("modifyMark"));
-    modifyMark.reset();
 
     verbal = new Verbal(document.getElementById("verbalInfo"), document.getElementById("verbalcontainer"), document.getElementById("verbalstudents"));
-    verbal.reset();
-
-    multipleModify = new MultipleModify(document.getElementById("changeMark_container"), document.getElementById("changeMark_list"));
-    multipleModify.reset();
-
-    document.querySelector("a[href='Logout']").addEventListener('click', () => {
-      window.sessionStorage.removeItem('username');
-    });
-  }
+   
+   	multipleModify = new MultipleModify(document.getElementById("changeMark_container"), document.getElementById("changeMark_list"));
+   	
+    document.getElementById("homePage").style.visibility = "hidden";
+    document.getElementById("enrolledPage").style.visibility = "hidden";
+    
+    
+     document.querySelector("a[href='Logout']").addEventListener('click', () => {
+        window.sessionStorage.removeItem('username');
+      })
+      
+    
+    this.start = function(){
+    userInfo.show();
+    coursesList.show();
+    }
+  
+  	this.refresh = function(){
+		document.getElementById("homePage").style.visibility = "hidden";
+		document.getElementById("enrolledPage").style.visibility = "hidden";	
+		document.getElementById("noStudents").textContent = " ";
+		document.getElementById("noExams").textContent = " ";
+		coursesList.reset();
+		examsList.reset();
+		studentsList.reset();
+		modifyMark.reset();
+		verbal.reset();
+		multipleModify.reset();
+	}
+	
+	this.returnHome = function(){
+	    document.getElementById("homePage").style.visibility = "visible";
+	    document.getElementById("homePage").addEventListener('click', function() {
+		pageManager.refresh();
+		coursesList.show();
+	  });
+     }
+   
+    this.returnStudents = function(courseId, examDate){
+		document.getElementById("enrolledPage").style.visibility = "visible";
+	    document.getElementById("enrolledPage").addEventListener('click', function() {
+		pageManager.refresh();
+		studentsList.show(courseId, examDate);
+	  });
+    }
 }
+
