@@ -546,8 +546,8 @@ function PageManager(){
 	}
 	
 	this.returnHome = function(){
-	   document.getElementById("homePage").style.visibility = "visible";
-	  document.getElementById("homePage").addEventListener('click', function() {
+	    document.getElementById("homePage").style.visibility = "visible";
+	    document.getElementById("homePage").addEventListener('click', function() {
 		pageManager.refresh();
 		coursesList.show();
 	  });
@@ -555,7 +555,7 @@ function PageManager(){
    
     this.returnStudents = function(courseId, examDate){
 		document.getElementById("enrolledPage").style.visibility = "visible";
-	  document.getElementById("enrolledPage").addEventListener('click', function() {
+	    document.getElementById("enrolledPage").addEventListener('click', function() {
 		pageManager.refresh();
 		studentsList.show(courseId, examDate);
 	  });
