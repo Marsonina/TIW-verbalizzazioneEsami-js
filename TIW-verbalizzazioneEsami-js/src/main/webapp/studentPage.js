@@ -8,8 +8,8 @@ window.addEventListener("load", ()=>{
 	if(sessionStorage.getItem("user") == null){
 		window.location.href = "index.html";
 	} else {
+		pageManager.refresh();
 		pageManager.start();
-		//pageManager.refresh();
 	}
 },false);
 
@@ -41,6 +41,8 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   };
 
   this.show = function() {
+	  pageManager.refresh();
+	  this.coursescontainer.style.visibility = "visible";  
     var self = this;
     makeCall("GET", "GoToHomeStudent", null, function(req) {
       if (req.readyState == 4) {
@@ -174,8 +176,8 @@ function Result(_title,_resultcontainer){
 	};
 	
 	this.show = function(courseid, examdate){
-		examsList.reset();
-		coursesList.reset();
+		pageManager.refresh();
+	  pageManager.returnHome();
 		this.title.style.visibility = "visible"; 
 		this.resultcontainer.style.visibility = "visible";
 	    var self = this;
@@ -263,24 +265,50 @@ refuse = function(examdate,courseid){
 function PageManager(){
   var info = document.getElementById("userInfo");
 
-  this.start = function(){
+
     var user = JSON.parse(sessionStorage.getItem("user"));
     userInfo = new UserInfo(user, info);
-    userInfo.show();
     
     coursesList = new CoursesList(document.getElementById("title1"),
     document.getElementById("courses_container"),document.getElementById("courses_list"));
-    coursesList.show();
     
     examsList = new ExamsList(document.getElementById("title2"),document.getElementById("goToViewRes"));
-    examsList.reset();
+
     
     result = new Result(document.getElementById("title3"),document.getElementById("examInfo"));
-    result.reset();
+
     
      document.querySelector("a[href='Logout']").addEventListener('click', () => {
 	        window.sessionStorage.removeItem('username');
 	      })
-  }
+	      
+	this.start = function(){
+	    userInfo.show();
+	    coursesList.show();
+    } 
+ 
+	this.refresh = function(){
+		document.getElementById("homePage").style.visibility = "hidden";
+		document.getElementById("noExams").textContent = " ";
+		coursesList.reset();
+		examsList.reset();
+		result.reset();
+	}
+	
+	this.returnHome = function(){
+	    document.getElementById("homePage").style.visibility = "visible";
+	    document.getElementById("homePage").addEventListener('click', function() {
+		pageManager.refresh();
+		coursesList.show();
+    });
+ }
 
 }
+
+
+
+
+
+	
+
+   
