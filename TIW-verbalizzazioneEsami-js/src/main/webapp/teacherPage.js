@@ -523,9 +523,8 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
 		}
 	
 		this.show = function(courseId, examDate, examStudents) {
-		coursesList.reset();
-		examsList.reset();
-		studentsList.reset();
+		pageManager.refresh();
+		pageManager.returnStudents(courseId, examDate);
 		this.modifycontainer.style.visibility = "visible";
 		document.getElementById("multipleModify").style.visibility = "visible";
 		
@@ -533,9 +532,10 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
 	    var studentsToModify = new Array();
 	    examStudents.forEach(function(examStudent) { 
 			if(examStudent.resultState ==="NON INSERITO")
-			studentsToModify.push(examStudent.matricola);
+			studentsToModify.push(examStudent);
 		});
-		var json = JSON.stringify(studentsToModify);
+		self.update(courseId, examDate, studentsToModify);
+		/*var json = JSON.stringify(studentsToModify);
 		var studentsParameter = encodeURIComponent(json);
 	    makeCall("GET", "GoToModifyPage?courseId="+courseId+"&"+"examDate="+examDate+"&matricola="+studentsParameter, null, function(req) {
 	     if (req.readyState == 4) {
@@ -550,14 +550,15 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
 	          console.log(message);
 	        }
 	      }
-	    });
+	    });*/
 	 };
 	 
 this.update = function(courseId, examDate, arrayStudents) {
 	
   var form = document.getElementById("resultForm");
+
   var tableBody = this.modifystudents;
-  
+  tableBody.innerHTML = "";
   var matricole = new Array();
 
   arrayStudents.forEach(function(examStudent) {
@@ -625,8 +626,18 @@ this.update = function(courseId, examDate, arrayStudents) {
       	else 
       		formOkay = false;
     	});
-    	if(formOkay)
-    		modify(examDate, courseId, form);	
+    	if(formOkay){
+    	modify(examDate, courseId, form);
+    	 /*var child = form.querySelector("[name='examMark']");
+		  while (child) {
+		    child.remove();
+		  }	
+		  var child = form.querySelector("[name='matricole']");
+		  if(child) {
+		    child.remove();
+		  }	*/
+		}
+		  
 	}
     });
 
