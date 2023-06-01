@@ -29,6 +29,21 @@ function UserInfo(_user, _userInfoContainer){
     this.container.querySelector('#role').innerText = this.role;
   }
 }
+//Diplay the user information
+function UserInfo(_user, _userInfoContainer){
+  this.name = _user.name;
+  this.surname = _user.surname;
+  this.matricola = _user.matricola;
+  this.role = _user.role;
+  this.container = _userInfoContainer;
+
+  this.show = function(){
+    this.container.querySelector('#name').innerText = this.name;
+    this.container.querySelector('#surname').innerText = this.surname;
+    this.container.querySelector('#matricola').innerText = this.matricola;
+    this.container.querySelector('#role').innerText = this.role;
+  }
+}
 
 //Display courses list
 function CoursesList(_title, _coursescontainer, _courseslist) {
@@ -41,9 +56,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
     this.title.textContent = " ";
   };
 
-  this.show = function() {
-	pageManager.refresh();
-	this.coursescontainer.style.visibility = "visible";  
+  this.show = function() { 
     var self = this;
     makeCall("GET", "GoToHomeTeacher", null, function(req) {
       if (req.readyState == 4) {
@@ -68,7 +81,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
 
   this.update = function(arraycourses) {
     document.getElementById('viewTitle').textContent = "Polimi servizi online";
-	this.title.textContent = "Select a date and choose an exam!"; 
+    this.title.textContent = "Select a date and choose an exam!"; 
 
     var tableBody = this.courseslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
@@ -84,30 +97,39 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       // Cella per il nome del corso come link
       var nameCell = document.createElement("td");
       var courseLink = document.createElement("a");
+      nameCell.appendChild(courseLink);
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
-      
-      courseLink.addEventListener("click", function() {
-	  	var allRows = document.querySelectorAll("tr");
-	  	allRows.forEach(function(row) {
-		    row.classList.remove("current");
-		  });
-		row.classList.add("current");
-        examsList.show(course.courseId)
-      });
-      
-      nameCell.appendChild(courseLink);
+      courseLink.setAttribute('courseId',course.courseId);
+    
+		courseLink.addEventListener("click", handleClick);
+		
+		function handleClick(e) {
+		  var allRows = document.querySelectorAll("tr");
+        allRows.forEach(function(row) {
+          row.classList.remove("current");
+        });
+        row.classList.add("current");
+		  examsList.show(e.target.getAttribute("courseId"));
+		
+		  // Rimuovi il listener dopo l'esecuzione dell'evento click
+		  //courseLink.removeEventListener("click", handleClick);
+		}
+           
       row.appendChild(nameCell);
 
       tableBody.appendChild(row);
     });
+    this.coursescontainer.style.visibility = "visible"; 
   };
 }
+
 
 //Display exams list
 function ExamsList(_title, _examslist){
 	this.title = _title;
 	this.examslist = _examslist;
+	this.selectedCourseId = null;
 	
   this.reset = function() {
     this.examslist.style.visibility = "hidden";
@@ -125,7 +147,7 @@ function ExamsList(_title, _examslist){
           var examsToShow = JSON.parse(response.exams);
           if (examsToShow.length == 0) {
 			  document.getElementById("noExams").textContent = "No exam date for course number " + courseId;
-			  examsList.reset();			  
+			  self.reset();			  
               return;
           }else{
 			  document.getElementById("noExams").textContent = " ";
@@ -139,28 +161,42 @@ function ExamsList(_title, _examslist){
         }
       }
     });
+    this.selectedCourseId = courseId;
+
   };
 	
-  this.update = function(arrayexams,courseid) {
+  this.update = function(arrayexams) {
+  console.log(this.selectedCourseId);
+  this.title.textContent = "Exam dates for the course number: " + this.selectedCourseId;
 
-	  this.title.textContent = "Exam dates for the course number: " + courseid;
-	    // Get the form elements
-	  var form = document.getElementById('goToViewRes');
-	  var examDateElement = form.querySelector('select[name="examDate"]');
-	  // Clear any existing options from the select element
-	  examDateElement.innerHTML = '';
-	  // Create and append new option elements based on the date array
-	  arrayexams.forEach(function(date) {
-	    var option = document.createElement('option');
-	    option.textContent = date.date;
-	    examDateElement.appendChild(option);
-	  });
-	  
-	  document.getElementById("viewRes").addEventListener("click", function() {
-		var selectedExam = examDateElement.value;
-		studentsList.show(courseid, selectedExam);
-      });
-  };
+  // Get the form elements
+  var form = document.getElementById('goToViewRes');
+  var examDateElement = form.querySelector('select[name="examDate"]');
+  
+  // Clear any existing options from the select element
+  examDateElement.innerHTML = '';
+
+  // Create and append new option elements based on the date array
+  arrayexams.forEach(function(date) {
+    var option = document.createElement('option');
+    option.textContent = date.date;
+    examDateElement.appendChild(option);
+  });
+
+  // Remove existing event listener (if any)
+  document.getElementById("viewRes").removeEventListener("click", handleClick);
+
+  // Add event listener
+  var self = this;
+  function handleClick() {
+    var selectedExam = examDateElement.value;
+    console.log("esam");
+    studentsList.show(self.selectedCourseId, selectedExam);
+  }
+
+  document.getElementById("viewRes").addEventListener("click", handleClick);
+};
+
 	
 }
 
@@ -169,7 +205,9 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
 	this.title = _title;
 	this.studentscontainer = _studentscontainer;
 	this.studentslist = _studentslist;
-	
+	this.courseId = null;
+	this.examDate = null;
+	this.arrayStudents = null;
 	this.reset = function() {
 	    this.studentscontainer.style.visibility = "hidden";
 	    document.getElementById("buttons").style.visibility = "hidden";
@@ -179,7 +217,6 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
   this.show = function(courseId, examDate) {
 	  pageManager.refresh();
 	  pageManager.returnHome();
-	  
 	 document.getElementById("noStudents").textContent = " ";   
 	 var self = this;
 	
@@ -192,12 +229,13 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
           var response = JSON.parse(req.responseText);
           if (response == null) {
             document.getElementById("noStudents").textContent = "No enrolled students for this exam!" + " Course id: "+ courseId + " Exam date: "+ examDate;
-            studentsList.reset();
+            self.reset();
             return;
           }else{
 			  document.getElementById("noStudents").textContent = " "
 		  }
-          self.update(response,courseId, examDate);
+		  self.arrayStudents = response;
+          self.update(response,self);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
           window.sessionStorage.removeItem('user');
@@ -206,31 +244,20 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
         }
       }
     });
+    this.courseId = courseId;
+	this.examDate = examDate;
+	
   };
   
-  this.update = function(arrayStudents,courseId, examDate) {
-	   document.getElementById('viewTitle').textContent = "Enrolled students for the selected exam"
-	this.title.textContent = "Course id: "+courseId+ " Exam date: "+examDate;
+  this.update = function(arrayStudents,self) {  
+	document.getElementById('viewTitle').textContent = "Enrolled students for the selected exam"
+	this.title.textContent = "Course id: "+this.courseId+ " Exam date: "+this.examDate;
     var tableBody = this.studentslist;
     tableBody.innerHTML = ""; // Svuota il corpo della tabella
 	var topublish = true;
 	var toverbalize = true;
 	var tomodify = true;
 	
-	document.getElementById("multiplemodifybutton").addEventListener("click", function() {
-		  multipleModify.show(courseId, examDate, arrayStudents);
-		  console.log(courseId, examDate);
-      });
-	document.getElementById("verbalizebutton").addEventListener("click", function() {
-		verbal.show(courseId, examDate);
-		console.log("bwee");
-		console.log(courseId, examDate);
-      });
-      
-    document.getElementById("publishbutton").addEventListener("click", function() {
-		console.log("ooooo");
-		Publish(courseId, examDate);
-      });
     arrayStudents.forEach(function(examStudent) { 
 
       var row = document.createElement("tr");
@@ -276,10 +303,15 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
 	  	modifyButton.disabled = false;
 	  }
 	  
-	  modifyButton.addEventListener('click', function() {
-		  var matricola = this.value;
-		  modifyMark.show(courseId, examDate, matricola)
-	  }); 
+	  modifyButton.removeEventListener("click", handleClick);
+	  // Add event listener
+	  function handleClick(e) {
+		   var matricola = this.value;
+	    modifyMark.show(self.courseId, self.examDate,matricola);
+	  }  
+	  
+	  modifyButton.addEventListener("click", handleClick);
+		  
       modifyCell.appendChild(modifyButton);
       row.appendChild(modifyCell);
   	  tableBody.appendChild(row);
@@ -313,11 +345,59 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
 
       
   };
+  
+  this.publish = function (self){
+	 document.getElementById("publishbutton").removeEventListener("click", publishButtonClickHandler);
+	document.getElementById("publishbutton").addEventListener("click", publishButtonClickHandler);
+	function publishButtonClickHandler(e) {
+	    console.log("publish");
+		makeCall("GET", "PublishResults?courseId="+self.courseId+"&examDate="+self.examDate, null, function(req) {
+	      if (req.readyState == 4) {
+	        var message = req.responseText;
+	        if (req.status == 200) {
+	          var response = JSON.parse(req.responseText);
+	          self.update(response,self);
+	        } else if (req.status == 403) {
+	          window.location.href = req.getResponseHeader("Location");
+	          window.sessionStorage.removeItem('user');
+	        } else {
+	          console.log(message);
+	        }
+	      }
+	    });
+  	}
+  }
+	this.verbalize = function(self){
+	 // Rimuovi i listener degli eventi click, se presenti  
+	  document.getElementById("verbalizebutton").removeEventListener("click", verbalizeButtonClickHandler);
+	  // Aggiungi i nuovi listener degli eventi click
+	 
+	  document.getElementById("verbalizebutton").addEventListener("click", verbalizeButtonClickHandler);
+	  
+	  function verbalizeButtonClickHandler(e) {
+	    verbal.show(self.courseId, self.examDate);
+	    console.log("Verbalize");
+	  }
+	}
+	this.multiplemodify = function(self){
+
+	  document.getElementById("multiplemodifybutton").removeEventListener("click", multipleModifyButtonClickHandler);
+	  document.getElementById("multiplemodifybutton").addEventListener("click", multipleModifyButtonClickHandler);
+	  
+	  function multipleModifyButtonClickHandler(e) {
+		  console.log("multMod"); 
+	    multipleModify.show(self.courseId, self.examDate, self.arrayStudents);   
+	  }
+
+	}
 }
 
 function ModifyMark(_title, _studentContent){
 	this.title = _title
 	this.studentContent = _studentContent;
+	var form = document.getElementById("singleModifyForm");
+	this.courseId = null;
+	this.examDate = null;
 	
 	this.reset = function() {
     this.studentContent.style.visibility = "hidden";
@@ -338,7 +418,7 @@ function ModifyMark(_title, _studentContent){
 	        var message = req.responseText;
 	        if (req.status == 200) {
 	          var response = JSON.parse(req.responseText);
-	          self.update(examdate,courseid,response);
+	          self.update(response);
 	        } else if (req.status == 403) {
 	          window.location.href = req.getResponseHeader("Location");
 	          window.sessionStorage.removeItem('user');
@@ -347,9 +427,11 @@ function ModifyMark(_title, _studentContent){
 	        }
 	      }
 	    });
+	    self.courseId = courseid;
+	    self.examDate = examdate;
 	}
 
-	this.update = function (examdate,courseId,arrayStudents){	
+	this.update = function (arrayStudents){	
 		document.getElementById('viewTitle').textContent = "Modify mark" 
 		this.title.textContent ="Enter the mark and press 'Modify' !" 
 		var matricolaElement = document.getElementById('matricolaStud');
@@ -369,7 +451,6 @@ function ModifyMark(_title, _studentContent){
 		emailElement.textContent  = student.email;
 		resultStateElement.textContent  = student.resultState;
 		
-		var form = document.getElementById("singleModifyForm");
 		var matricolaHidden = document.createElement('input');
 	    matricolaHidden.setAttribute("type", "hidden");
 	    matricolaHidden.setAttribute("name", "matricole"); // Utilizza "[]" per indicare che è un array di valori
@@ -378,37 +459,45 @@ function ModifyMark(_title, _studentContent){
 	    
 	    });
     
-		document.getElementById("modifybutton").addEventListener('click', function(e) {
+
+	}
+	
+	this.modify = function(self) {
+		document.getElementById("modifybutton").removeEventListener("click", modifyAllButtonClickHandler);
+		document.getElementById("modifybutton").addEventListener("click", modifyAllButtonClickHandler);
+		function modifyAllButtonClickHandler(e) {
+		    console.log("modify");
 			var form = e.target.closest("form");
 			var input = form.examMark.value;
 			if (form.checkValidity() && validateFormValues(input)) {
-			  modify(examdate, courseId, form);
+				var courseId = self.courseId;
+				var examDate = self.examDate;
+		  		makeCall("POST", "ModifyMark?courseId=" + self.courseId + "&examDate=" + self.examDate, form, function(req) {
+		    	if (req.readyState == 4) {
+		      	var message = req.responseText;
+		      	if (req.status == 200) {
+				  studentsList.show(courseId,examDate);
+				  self.reset();
+		      } else if (req.status == 403) {
+		        window.location.href = req.getResponseHeader("Location");
+		        window.sessionStorage.removeItem('user');
+		      } else {
+		        console.log(message);
+		      }
+		      }	
+  			});
 			  var child = form.querySelector("[name='matricole']");
 			  if (child) {
 			    child.remove();
 			  }
 			}
-		});
 
-	}
-}
+		};
+
+		}
 	
-	function modify(examdate, courseId, form) {
-	  	makeCall("POST", "ModifyMark?courseId=" + courseId + "&examDate=" + examdate, form, function(req) {
-	    if (req.readyState == 4) {
-	      var message = req.responseText;
-	      if (req.status == 200) {
-			  studentsList.show(courseId, examdate);
-			  modifyMark.reset();
-	      } else if (req.status == 403) {
-	        window.location.href = req.getResponseHeader("Location");
-	        window.sessionStorage.removeItem('user');
-	      } else {
-	        console.log(message);
-	      }
-	    }
-  	});
 }
+
 
 //Form input validation
 validateFormValues = function(input) {
@@ -423,22 +512,6 @@ validateFormValues = function(input) {
   return true;
 }
 
-function Publish(courseId, examDate){
-	makeCall("GET", "PublishResults?courseId="+courseId+"&examDate="+examDate, null, function(req) {
-      if (req.readyState == 4) {
-        var message = req.responseText;
-        if (req.status == 200) {
-          var response = JSON.parse(req.responseText);
-          studentsList.update(response, courseId, examDate);
-        } else if (req.status == 403) {
-          window.location.href = req.getResponseHeader("Location");
-          window.sessionStorage.removeItem('user');
-        } else {
-          console.log(message);
-        }
-      }
-    });
-}
 
 function Verbal(_title, _verbalcontainer, _verbalstudents){
 	this.title= _title;
@@ -451,8 +524,6 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
 	}	
 	
 	this.show = function(courseId, examDate){
-		console.log("ciao");
-		console.log(courseId,examDate);
 		pageManager.refresh();
 		pageManager.returnStudents(courseId, examDate);
 		var self = this;
@@ -517,11 +588,17 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
     });
 		
 	}
+
 }
+
+
 	
-	function MultipleModify(_modifycontainer, _modifystudents){
+function MultipleModify(_modifycontainer, _modifystudents){
 		this.modifycontainer = _modifycontainer;
 		this.modifystudents = _modifystudents;
+		this.courseId = null;
+		this.examDate = null;
+		var resultForm = document.getElementById("resultForm");
 		
 		this.reset = function() {
 		this.modifycontainer.style.visibility = "hidden";
@@ -529,39 +606,24 @@ function Verbal(_title, _verbalcontainer, _verbalstudents){
 		}
 	
 		this.show = function(courseId, examDate, examStudents) {
-		pageManager.refresh();
-		pageManager.returnStudents(courseId, examDate);
-		this.modifycontainer.style.visibility = "visible";
-		document.getElementById("multipleModify").style.visibility = "visible";
+			pageManager.refresh();
+			pageManager.returnStudents(courseId, examDate);
+			this.modifycontainer.style.visibility = "visible";
+			document.getElementById("multipleModify").style.visibility = "visible";
+			
+		    var studentsToModify = new Array();
+		    examStudents.forEach(function(examStudent) { 
+				if(examStudent.resultState ==="NON INSERITO")
+				studentsToModify.push(examStudent);
+			});
+			this.courseId = courseId;
+			this.examDate = examDate;
+			this.update(studentsToModify);
 		
-	    var self = this;
-	    var studentsToModify = new Array();
-	    examStudents.forEach(function(examStudent) { 
-			if(examStudent.resultState ==="NON INSERITO")
-			studentsToModify.push(examStudent);
-		});
-		self.update(courseId, examDate, studentsToModify);
-		/*var json = JSON.stringify(studentsToModify);
-		var studentsParameter = encodeURIComponent(json);
-	    makeCall("GET", "GoToModifyPage?courseId="+courseId+"&"+"examDate="+examDate+"&matricola="+studentsParameter, null, function(req) {
-	     if (req.readyState == 4) {
-	        var message = req.responseText;
-	        if (req.status == 200) {
-			  var response = JSON.parse(req.responseText);
-	          self.update(courseId, examDate, response);
-	        } else if (req.status == 403) {
-	          window.location.href = req.getResponseHeader("Location");
-	          window.sessionStorage.removeItem('user');
-	        } else {
-	          console.log(message);
-	        }
-	      }
-	    });*/
 	 };
 	 
-this.update = function(courseId, examDate, arrayStudents) {
- console.log(examDate, courseId);	
-  var form = document.getElementById("resultForm");
+this.update = function(arrayStudents) {
+  var form = document.getElementById("resultForm");;
   var tableBody = this.modifystudents;
   tableBody.innerHTML = "";
   var matricole = new Array();
@@ -612,59 +674,50 @@ this.update = function(courseId, examDate, arrayStudents) {
     row.appendChild(matricolaHidden);
 
     tableBody.appendChild(row);
-    console.log(form.value);
   });
 	
-  	modifyButton = document.getElementById("modifyAllbutton");
-  	modifyButton.addEventListener("click", function(e) {
-	var form = e.target.closest("form");
-	console.log(form);
-    if (form.checkValidity()){
-		var resultInputs = document.querySelectorAll("td input[name='examMark']");
-		var results = [];
-		var formOkay = true;
-		resultInputs.forEach(function(input) {
-			console.log(input)
-		if(validateFormValues(input.value))
-      		results.push(input.value);
-      	else 
-      		formOkay = false;
-    	});
-    	if(formOkay){
-    	modify(examDate, courseId, form);
-    	console.log(examDate, courseId);
-    	  /*var child = form.querySelector("[name='examMark']");
-		  while (child) {
-		    child.remove();
-		  }	
-		  var child = form.querySelector("[name='matricole']");
-		  if(child) {
-		    child.remove();
-		  }	*/
+  }	
+	
+	this.modify = function(self) {
+		document.getElementById("modifyAllbutton").removeEventListener("click", modifyAllButtonClickHandler);
+		document.getElementById("modifyAllbutton").addEventListener("click", modifyAllButtonClickHandler);
+		function modifyAllButtonClickHandler(e) {
+		    console.log("modifyAll");
+			var form = e.target.closest("form");;
+		    if (form.checkValidity()){
+				var resultInputs = document.querySelectorAll("td input[name='examMark']");
+				var results = [];
+				var formOkay = true;
+				resultInputs.forEach(function(input) {
+				if(validateFormValues(input.value))
+		      		results.push(input.value);
+		      	else 
+		      		formOkay = false;
+		    	});
+		    	if(formOkay){
+					courseId = self.courseId;
+					examDate = self.examDate;
+		    		makeCall("POST", "ModifyMark?courseId=" + self.courseId + "&examDate=" + self.examDate, form, function(req) {
+			    	if (req.readyState == 4) {
+			      		var message = req.responseText;
+				      	if (req.status == 200) {
+						  studentsList.show(courseId, examDate);
+						  multipleModify.reset();
+				      	} else if (req.status == 403) {
+					        window.location.href = req.getResponseHeader("Location");
+					        window.sessionStorage.removeItem('user');
+				      	} else {
+				        	console.log(message);
+				      	}
+			    	}
+			  		});
+				}
+				
+
+			};
+
 		}
-		  
 	}
-    });
-
-	function modify(examdate, courseId, form) {
-		console.log(form.value)
-  		makeCall("POST", "ModifyMark?courseId=" + courseId + "&examDate=" + examdate, form, function(req) {
-    	if (req.readyState == 4) {
-      		var message = req.responseText;
-      	if (req.status == 200) {
-		  studentsList.show(courseId, examdate);
-		  multipleModify.reset();
-      	} else if (req.status == 403) {
-	        window.location.href = req.getResponseHeader("Location");
-	        window.sessionStorage.removeItem('user');
-      	} else {
-        	console.log(message);
-      	}
-    }
-  });
-
-};
-}
 }
 
 
@@ -689,8 +742,13 @@ function PageManager(){
      })
       
     this.start = function(){
-    userInfo.show();
-    coursesList.show();
+	    userInfo.show();
+	    coursesList.show();
+	    studentsList.publish(studentsList);
+	    studentsList.verbalize(studentsList);
+	    studentsList.multiplemodify(studentsList);
+	    multipleModify.modify(multipleModify);
+	    modifyMark.modify(modifyMark);
     }
   
   	this.refresh = function(){
@@ -706,6 +764,7 @@ function PageManager(){
 		multipleModify.reset();
 	}
 	document.getElementById("homePage").addEventListener('click', function() {
+		console.log("return");
 		pageManager.refresh();
 		coursesList.show();
 	 });
@@ -714,13 +773,18 @@ function PageManager(){
 	    document.getElementById("homePage").style.visibility = "visible";
 
      }
-   
+     
+
+	
     this.returnStudents = function(courseId, examDate){
 		document.getElementById("enrolledPage").style.visibility = "visible";
 	    document.getElementById("enrolledPage").addEventListener('click', function() {
+		console.log("return");	
 		pageManager.refresh();
 		studentsList.show(courseId, examDate);
 	  });
     }
+
 }
+
 
