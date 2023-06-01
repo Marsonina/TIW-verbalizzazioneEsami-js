@@ -1,5 +1,5 @@
 /**
- * AJAX call management nostro
+ * AJAX call management
  */
 
 	function makeCall(method, url, formElement, cback, reset = true) {

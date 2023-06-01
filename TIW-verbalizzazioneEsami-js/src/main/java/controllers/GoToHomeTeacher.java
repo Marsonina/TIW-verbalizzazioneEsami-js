@@ -63,6 +63,7 @@ public class GoToHomeTeacher extends HttpServlet {
 				//check permissions
 				CheckPermissions checker = new CheckPermissions(connection, user, request, response);
 				checker.checkTeacherPermissions(chosenCourseId);
+				
 			}
 		} catch (SQLException e) {
 			// throw new ServletException(e);

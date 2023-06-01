@@ -49,6 +49,9 @@ public class VerbalizeResults extends HttpServlet {
 		String selectedDate = request.getParameter("examDate");
 		String selectedCourse = request.getParameter("courseId");
 		
+		System.out.println(selectedDate);
+		System.out.println(selectedCourse);
+		
 		List<ExamStudent> students = new ArrayList<ExamStudent>();
 		ExamDAO eDao = new ExamDAO(connection, Integer.parseInt(selectedCourse) ,selectedDate);
 		Verbal verbal = new Verbal();
@@ -95,7 +98,7 @@ public class VerbalizeResults extends HttpServlet {
 			verbal.setMatricolaTeacher(matricolaTeacher);
 			try {
 				students = eDao.getVerbalizedResult();
-				
+				System.out.println(students);
 				if(students == null) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					response.getWriter().println(("No verbalizable results1"));

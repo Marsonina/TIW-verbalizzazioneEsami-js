@@ -37,11 +37,6 @@ public class CheckLogin extends HttpServlet {
 		connection = DbConnection.connect(getServletContext());
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		// TODO Auto-generated method stub
-	}
-
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		//get of parameters insert by the user
@@ -78,7 +73,7 @@ public class CheckLogin extends HttpServlet {
 		
 		
 		if (u == null) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Incorrect credentials");
 		} else {
 			request.getSession().setAttribute("user", u);

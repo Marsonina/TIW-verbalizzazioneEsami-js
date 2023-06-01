@@ -1,9 +1,9 @@
 /**
- * Login management nostro
+ * Login management
  */
 
+//Function that handles the click action on the login button
 (function() { 
-
   document.getElementById("loginbutton").addEventListener('click', (e) => {
     var form = e.target.closest("form");
     if (form.checkValidity()) {
@@ -15,7 +15,6 @@
               case 200:
             	sessionStorage.setItem('user', message);
             	var role = JSON.parse(message).role;
-            	console.log(role);
             	if(role === "teacher"){
                 	window.location.href = "Teacher.html";
                 }else if(role === "student" ){

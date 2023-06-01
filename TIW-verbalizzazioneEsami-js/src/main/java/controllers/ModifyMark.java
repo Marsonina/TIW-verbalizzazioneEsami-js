@@ -55,7 +55,12 @@ public class ModifyMark extends HttpServlet {
 		String chosenExam = request.getParameter("examDate");
 		String[] examMark = request.getParameterValues("examMark");
 		String[] matricoleExam = request.getParameterValues("matricole");
-		
+		for(int i=0;i<matricoleExam.length;i++)
+			System.out.println(matricoleExam[i]);
+		for(int i=0;i<examMark.length;i++)
+			System.out.println(examMark[i]);
+		System.out.println(chosenCourse);
+		System.out.println(chosenExam);
 		ExamDAO eDao = new ExamDAO(connection, chosenCourseId, chosenExam);
 
 		//check permissions
@@ -81,9 +86,12 @@ public class ModifyMark extends HttpServlet {
 		for(int i=0; i < examMark.length; i++) {
 			//checking if the mark inserted is valid
 			if(marks.contains(examMark[i])){
+				System.out.println(matricoleExam[i]);
+				System.out.println(examMark[i]);
 				ExamStudent examStud = new ExamStudent();
 				try {
 					examStud = eDao.getResult(matricoleExam[i]);
+					System.out.println(examStud.getMatricola());
 					//checking if the mark is already published or verbalized
 					if(!(examStud.getResultState()).equals("PUBBLICATO")&& !(examStud.getResultState()).equals("VERBALIZZATO")) {
 						//change the mark of the student
