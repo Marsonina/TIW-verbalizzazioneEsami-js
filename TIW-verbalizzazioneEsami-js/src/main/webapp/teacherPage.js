@@ -5,30 +5,17 @@ let pageManager = new PageManager();
 
 //function to load the 'first' page
 window.addEventListener("load", ()=>{
+	//user not logged in
 	if(sessionStorage.getItem("user") == null){
 		window.location.href = "index.html";
 	} else {
+		//user logged in
 		pageManager.refresh();
 		pageManager.start();
 	}
 },false);
 
 
-//Diplay the user information
-function UserInfo(_user, _userInfoContainer){
-  this.name = _user.name;
-  this.surname = _user.surname;
-  this.matricola = _user.matricola;
-  this.role = _user.role;
-  this.container = _userInfoContainer;
-
-  this.show = function(){
-    this.container.querySelector('#name').innerText = this.name;
-    this.container.querySelector('#surname').innerText = this.surname;
-    this.container.querySelector('#matricola').innerText = this.matricola;
-    this.container.querySelector('#role').innerText = this.role;
-  }
-}
 //Diplay the user information
 function UserInfo(_user, _userInfoContainer){
   this.name = _user.name;
@@ -84,37 +71,34 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
     this.title.textContent = "Select a date and choose an exam!"; 
 
     var tableBody = this.courseslist;
-    tableBody.innerHTML = ""; // Svuota il corpo della tabella
+    tableBody.innerHTML = ""; // makes the table body empty
     
     arraycourses.forEach(function(course) {  
       var row = document.createElement("tr");
       
-      // Cella per l'ID del corso
+      // ID Course Cell
       var idCell = document.createElement("td");
       idCell.textContent = course.courseId;
       row.appendChild(idCell);
       
-      // Cella per il nome del corso come link
+      // Course's name Cell with link
       var nameCell = document.createElement("td");
       var courseLink = document.createElement("a");
       nameCell.appendChild(courseLink);
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
       courseLink.setAttribute('courseId',course.courseId);
-    
-		courseLink.addEventListener("click", handleClick);
-		
-		function handleClick(e) {
+      //we handle the evnt of click on courseId 
+	  courseLink.addEventListener("click", handleClick);
+	  //function that highlight the course selected and handles the click on link
+	  function handleClick(e) {
 		  var allRows = document.querySelectorAll("tr");
-        allRows.forEach(function(row) {
+          allRows.forEach(function(row) {
           row.classList.remove("current");
-        });
-        row.classList.add("current");
-		  examsList.show(e.target.getAttribute("courseId"));
-		
-		  // Rimuovi il listener dopo l'esecuzione dell'evento click
-		  //courseLink.removeEventListener("click", handleClick);
-		}
+      });
+      row.classList.add("current");
+	  examsList.show(e.target.getAttribute("courseId"));
+	  }
            
       row.appendChild(nameCell);
 
@@ -131,9 +115,9 @@ function ExamsList(_title, _examslist){
 	this.examslist = _examslist;
 	this.selectedCourseId = null;
 	
-  this.reset = function() {
-    this.examslist.style.visibility = "hidden";
-  };
+  	this.reset = function() {
+		this.examslist.style.visibility = "hidden";
+  	};
 
   this.show = function(courseId) {
 	document.getElementById("noExams").textContent = " ";  
@@ -347,7 +331,7 @@ function StudentsList (_title,_studentscontainer, _studentslist) {
   };
   
   this.publish = function (self){
-	 document.getElementById("publishbutton").removeEventListener("click", publishButtonClickHandler);
+	document.getElementById("publishbutton").removeEventListener("click", publishButtonClickHandler);
 	document.getElementById("publishbutton").addEventListener("click", publishButtonClickHandler);
 	function publishButtonClickHandler(e) {
 	    console.log("publish");
@@ -725,22 +709,29 @@ this.update = function(arrayStudents) {
 function PageManager(){
   	var info = document.getElementById("userInfo");
     var user = JSON.parse(sessionStorage.getItem("user"));
+    
     userInfo = new UserInfo(user, info);
     coursesList = new CoursesList(document.getElementById("title1"),
-    document.getElementById("courses_container"),document.getElementById("courses_list")); 
+    							  document.getElementById("courses_container"),
+    							  document.getElementById("courses_list")); 
     examsList = new ExamsList(document.getElementById("title2"),document.getElementById("goToViewRes"));
-    studentsList = new StudentsList (document.getElementById("title3"), document.getElementById("examStudents_container"),document.getElementById("students_list"));
+    studentsList = new StudentsList (document.getElementById("title3"), 
+    							     document.getElementById("examStudents_container"),
+    							     document.getElementById("students_list"));
     modifyMark = new ModifyMark(document.getElementById("title4"), document.getElementById("modifyMark"));
-    verbal = new Verbal(document.getElementById("verbalInfo"), document.getElementById("verbalcontainer"), document.getElementById("verbalstudents"));
-   	multipleModify = new MultipleModify(document.getElementById("changeMark_container"), document.getElementById("changeMark_list"));
+    verbal = new Verbal(document.getElementById("verbalInfo"), document.getElementById("verbalcontainer"), 
+    				    document.getElementById("verbalstudents"));
+   	multipleModify = new MultipleModify(document.getElementById("changeMark_container"), 
+   										document.getElementById("changeMark_list"));
    	
     document.getElementById("homePage").style.visibility = "hidden";
     document.getElementById("enrolledPage").style.visibility = "hidden";
     
-     document.querySelector("a[href='Logout']").addEventListener('click', () => {
+    document.querySelector("a[href='Logout']").addEventListener('click', () => {
         window.sessionStorage.removeItem('username');
-     })
+    })
       
+    //we initialize the main page with user info and courses' list
     this.start = function(){
 	    userInfo.show();
 	    coursesList.show();
@@ -751,6 +742,7 @@ function PageManager(){
 	    modifyMark.modify(modifyMark);
     }
   
+  	//we initially hide every component 
   	this.refresh = function(){
 		document.getElementById("homePage").style.visibility = "hidden";
 		document.getElementById("enrolledPage").style.visibility = "hidden";	
@@ -763,19 +755,19 @@ function PageManager(){
 		verbal.reset();
 		multipleModify.reset();
 	}
+	
+	//key that allows the return to the homePage view containing teacher's courses
 	document.getElementById("homePage").addEventListener('click', function() {
-		console.log("return");
 		pageManager.refresh();
 		coursesList.show();
 	 });
 	
+	//function that makes the return to the homePage key visible
 	this.returnHome = function(){
 	    document.getElementById("homePage").style.visibility = "visible";
-
-     }
-     
-
+    }  
 	
+	//key that allows the return to the view of all enrolled students
     this.returnStudents = function(courseId, examDate){
 		document.getElementById("enrolledPage").style.visibility = "visible";
 	    document.getElementById("enrolledPage").addEventListener('click', function() {
