@@ -101,19 +101,19 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       courseLink.textContent = course.courseName;
       courseLink.setAttribute("href", "#");
       courseLink.setAttribute('courseId',course.courseId);
-    
+      
+		courseLink.removeEventListener("click", handleClick);    
 		courseLink.addEventListener("click", handleClick);
 		
 		function handleClick(e) {
+			console.log("course");
 		  var allRows = document.querySelectorAll("tr");
-        allRows.forEach(function(row) {
+          allRows.forEach(function(row) {
           row.classList.remove("current");
         });
         row.classList.add("current");
 		  examsList.show(e.target.getAttribute("courseId"));
 		
-		  // Rimuovi il listener dopo l'esecuzione dell'evento click
-		  //courseLink.removeEventListener("click", handleClick);
 		}
            
       row.appendChild(nameCell);
@@ -130,7 +130,9 @@ function ExamsList(_title, _examslist){
 	this.title = _title;
 	this.examslist = _examslist;
 	this.selectedCourseId = null;
-	
+	var form = document.getElementById('goToViewRes');
+    this.examDate = form.querySelector('select[name="examDate"]');
+    
   this.reset = function() {
     this.examslist.style.visibility = "hidden";
   };
@@ -152,7 +154,7 @@ function ExamsList(_title, _examslist){
           }else{
 			  document.getElementById("noExams").textContent = " ";
 		  }
-          self.update(examsToShow,courseId);
+          self.update(examsToShow);
         } else if (req.status == 403) {
           window.location.href = req.getResponseHeader("Location");
           window.sessionStorage.removeItem('user');
@@ -169,9 +171,7 @@ function ExamsList(_title, _examslist){
   console.log(this.selectedCourseId);
   this.title.textContent = "Exam dates for the course number: " + this.selectedCourseId;
 
-  // Get the form elements
-  var form = document.getElementById('goToViewRes');
-  var examDateElement = form.querySelector('select[name="examDate"]');
+  var examDateElement = this.examDate
   
   // Clear any existing options from the select element
   examDateElement.innerHTML = '';
@@ -183,19 +183,20 @@ function ExamsList(_title, _examslist){
     examDateElement.appendChild(option);
   });
 
+
+
+};
+  this.examSelection = function(self){
   // Remove existing event listener (if any)
   document.getElementById("viewRes").removeEventListener("click", handleClick);
-
+  document.getElementById("viewRes").addEventListener("click", handleClick);
   // Add event listener
-  var self = this;
-  function handleClick() {
-    var selectedExam = examDateElement.value;
+  function handleClick(e) {
+    var selectedExam = self.examDate.value;
     console.log("esam");
     studentsList.show(self.selectedCourseId, selectedExam);
   }
-
-  document.getElementById("viewRes").addEventListener("click", handleClick);
-};
+  }
 
 	
 }
@@ -749,6 +750,7 @@ function PageManager(){
 	    studentsList.multiplemodify(studentsList);
 	    multipleModify.modify(multipleModify);
 	    modifyMark.modify(modifyMark);
+	    examsList.examSelection(examsList);
     }
   
   	this.refresh = function(){
@@ -774,8 +776,6 @@ function PageManager(){
 
      }
      
-
-	
     this.returnStudents = function(courseId, examDate){
 		document.getElementById("enrolledPage").style.visibility = "visible";
 	    document.getElementById("enrolledPage").addEventListener('click', function() {
