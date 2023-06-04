@@ -36,7 +36,8 @@ public class Checker implements Filter {
 		HttpSession s = req.getSession();
 		
 		if (s.isNew() || s.getAttribute("user") == null) {
-			res.sendRedirect(loginpath);
+			res.setStatus(403);
+			res.setHeader("Location", loginpath);
 			return;
 		}
 		// pass the request along the filter chain

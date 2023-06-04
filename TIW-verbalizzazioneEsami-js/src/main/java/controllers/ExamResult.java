@@ -37,7 +37,6 @@ public class ExamResult extends HttpServlet {
 	public void init() throws ServletException {
 		//connecting with DB
 		connection = DbConnection.connect(getServletContext());
-		//configuring template
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -59,15 +58,15 @@ public class ExamResult extends HttpServlet {
 			CourseDAO cDao = new CourseDAO(connection, Integer.parseInt(chosenCourse));
 			//checking if the course selected exists
 			if(cDao.findCourse() == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().println("Trying to access to not existing course");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
 				return;
 			}
 			//checking if the current student attends the selected course
 			List<String> currStudents = cDao.findAttendingStudent();
 			if(currStudents == null || !currStudents.contains(user.getMatricola())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().println("Trying to access to not attended course");
+				response.getWriter().println("Bad request, retry!");
 				return;
 			}				
 		} catch (SQLException e) {
@@ -79,8 +78,8 @@ public class ExamResult extends HttpServlet {
 		try {	
 			//checking if the exam date selected exists		
 			if(eDao.findExam() == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().println("Try to access to not existing exam");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
 				return;
 			}
 			//checking if the student is enrolled to a specific exam in a specific date

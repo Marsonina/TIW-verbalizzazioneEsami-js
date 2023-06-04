@@ -19,8 +19,8 @@ import com.google.gson.JsonObject;
 import beans.Course;
 import beans.Exam;
 import beans.User;
+import dao.CourseDAO;
 import dao.TeacherDAO;
-import utility.CheckPermissions;
 import utility.DbConnection;
 
 
@@ -52,18 +52,24 @@ public class GoToHomeTeacher extends HttpServlet {
 		int chosenCourseId = 0;
 		
 		try {
-			//courses held by the teacher
 			courses = tDao.getCourses();
-			
 			if (chosenCourse != null) { 
 				chosenCourseId = Integer.parseInt(chosenCourse);
-				//exam's available dates corresponding to the selected course
+				//exams corresponding to selected course
 				exams = tDao.getExamDates(chosenCourseId);
-				
 				//check permissions
-				CheckPermissions checker = new CheckPermissions(connection, user, request, response);
-				checker.checkTeacherPermissions(chosenCourseId);
-				
+				CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
+				if(cDao.findCourse() == null) {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().println("Bad request, retry!");
+					return;
+				}
+				String currTeacher = cDao.findOwnerTeacher();
+				if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					response.getWriter().println("Bad request, retry!");
+					return;
+				}
 			}
 		} catch (SQLException e) {
 			// throw new ServletException(e);

@@ -62,7 +62,7 @@ public class GoToHomeStudent extends HttpServlet {
 				CourseDAO cDao = new CourseDAO(connection, chosenCourseId);	
 				//checking if the selection of the course is correct
 				if(cDao.findCourse() == null) {
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 					response.getWriter().println("Trying to access to not existing course");
 					return;
 				}

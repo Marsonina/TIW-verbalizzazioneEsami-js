@@ -57,11 +57,12 @@ public class VerbalizeResults extends HttpServlet {
 		Verbal verbal = new Verbal();
 	    Boolean checkVerbalize=false;
 		
+	    //checl permissions
 		try {
 			//checking if the selected course exists
 			CourseDAO cDao = new CourseDAO(connection, Integer.parseInt(selectedCourse));
 			if(cDao.findCourse() == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				response.getWriter().println("Error with course choice");
 				return;
 			}
@@ -80,7 +81,7 @@ public class VerbalizeResults extends HttpServlet {
 		try {
 			//checking if the the exam date is correct
 			if(eDao.findExam() == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				response.getWriter().println("Error with exam choice");
 				return;
 			}
@@ -98,10 +99,9 @@ public class VerbalizeResults extends HttpServlet {
 			verbal.setMatricolaTeacher(matricolaTeacher);
 			try {
 				students = eDao.getVerbalizedResult();
-				System.out.println(students);
 				if(students == null) {
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().println(("No verbalizable results1"));
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().println(("No verbalizable results"));
 					return;
 				}else{
 				
@@ -114,8 +114,8 @@ public class VerbalizeResults extends HttpServlet {
 					}
 					
 					if(!checkVerbalize) {
-						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-						response.getWriter().println("No verbalizable results2");
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().println("No verbalizable results");
 						return;
 					}
 				}
