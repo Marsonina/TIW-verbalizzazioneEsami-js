@@ -493,7 +493,6 @@ function ModifyMark(_title, _studentContent){
 validateFormValues = function(input) {
   var validOptions = ["18", "19", "20", "21", "22", "23", "24", 
   "25", "26", "27", "28", "29", "30", "30L", "ASSENTE", "RIPROVATO"];
-  console.log(input);
   for (var i = 0; i < validOptions.length; i++) {
     if (!validOptions.includes(input)) {
       return false;
