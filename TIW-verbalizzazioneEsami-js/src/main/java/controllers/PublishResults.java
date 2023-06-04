@@ -41,21 +41,21 @@ public class PublishResults extends HttpServlet {
 		String selectedCourse = request.getParameter("courseId");
 		int chosenCourseId = Integer.parseInt(selectedCourse);
 		
-	    ExamDAO eDao = new ExamDAO(connection, Integer.parseInt(selectedCourse) ,selectedDate);
+	    ExamDAO eDao = new ExamDAO(connection,chosenCourseId,selectedDate);
 		
 		try { 
 			//checking if the selected course exists
 			CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
 			if(cDao.findCourse() == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().println("Try to access to not attended exam");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
 				return;
 			}
 			//checking if the current teacher owns the selected course
 			String currTeacher = cDao.findOwnerTeacher();
 			if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().println("Try to access to not attended exam");
+				response.getWriter().println("Bad request, retry!");
 				return;
 			}
 		} catch (SQLException e) {

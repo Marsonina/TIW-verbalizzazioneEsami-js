@@ -17,8 +17,8 @@ import javax.servlet.http.HttpSession;
 
 import beans.ExamStudent;
 import beans.User;
-import utility.CheckPermissions;
 import utility.DbConnection;
+import dao.CourseDAO;
 import dao.ExamDAO;
 
 @WebServlet("/ModifyMark")
@@ -55,28 +55,35 @@ public class ModifyMark extends HttpServlet {
 		String chosenExam = request.getParameter("examDate");
 		String[] examMark = request.getParameterValues("examMark");
 		String[] matricoleExam = request.getParameterValues("matricole");
-		for(int i=0;i<matricoleExam.length;i++)
-			System.out.println(matricoleExam[i]);
-		for(int i=0;i<examMark.length;i++)
-			System.out.println(examMark[i]);
-		System.out.println(chosenCourse);
-		System.out.println(chosenExam);
 		ExamDAO eDao = new ExamDAO(connection, chosenCourseId, chosenExam);
 
 		//check permissions
-		CheckPermissions checker = new CheckPermissions(connection, user, request, response);
 		try { 
-			//checking if the selected course is correct and "owned" by the teacher
-			checker.checkTeacherPermissions(chosenCourseId);
-		}catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Failure in courses info database extraction");
-			return;
+			//checking if the selected course exists
+			CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
+			if(cDao.findCourse() == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
+			//checking if the current teacher owns the selected course
+			String currTeacher = cDao.findOwnerTeacher();
+			if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
+		} catch (SQLException e) {
+			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in teacher's exams database extraction");
 		}
-		
+		//check permissions
 		try {
 			//checking if the the exam date is correct
-			checker.checkExamDate(eDao);
+			if(eDao.findExam() == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
 		} catch (SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Failure in exam info database extraction");
@@ -86,12 +93,9 @@ public class ModifyMark extends HttpServlet {
 		for(int i=0; i < examMark.length; i++) {
 			//checking if the mark inserted is valid
 			if(marks.contains(examMark[i])){
-				System.out.println(matricoleExam[i]);
-				System.out.println(examMark[i]);
 				ExamStudent examStud = new ExamStudent();
 				try {
 					examStud = eDao.getResult(matricoleExam[i]);
-					System.out.println(examStud.getMatricola());
 					//checking if the mark is already published or verbalized
 					if(!(examStud.getResultState()).equals("PUBBLICATO")&& !(examStud.getResultState()).equals("VERBALIZZATO")) {
 						//change the mark of the student

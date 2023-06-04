@@ -18,8 +18,8 @@ import com.google.gson.Gson;
 
 import beans.ExamStudent;
 import beans.User;
-import utility.CheckPermissions;
 import utility.DbConnection;
+import dao.CourseDAO;
 import dao.ExamDAO;
 
 @WebServlet("/GoToModifyPage")
@@ -54,19 +54,32 @@ public class GoToModifyPage extends HttpServlet {
 		ExamStudent examStudent = new ExamStudent();
 		
 		//check permissions
-		CheckPermissions checker = new CheckPermissions(connection, user, request, response);
 		try { 
-			//checking if the selected course is correct and "owned" by the teacher
-			checker.checkTeacherPermissions(chosenCourseId);
-		}catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Failure in courses info database extraction");
-			return;
+			CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
+			//checking if the selected course exists
+			if(cDao.findCourse() == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
+			String currTeacher = cDao.findOwnerTeacher();
+			//checking if the current teacher owns the selected course
+			if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
+		} catch (SQLException e) {
+			response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "Failure in teacher's exams database extraction");
 		}
-		
-		try {
+		//check permissions
+		try { 
 			//checking if the the exam date is correct
-			checker.checkExamDate(eDao);
+			if(eDao.findExam() == null) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
 		} catch (SQLException e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("Failure in exam info database extraction");

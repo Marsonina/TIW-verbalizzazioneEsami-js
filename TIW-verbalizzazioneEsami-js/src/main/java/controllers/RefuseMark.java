@@ -49,7 +49,7 @@ public class RefuseMark extends HttpServlet {
 		try {	
 			//checking if the exam date selected exists		
 			if(eDao.findExam() == null) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				response.getWriter().println("Try to access to not existing exam");
 				return;
 			}
