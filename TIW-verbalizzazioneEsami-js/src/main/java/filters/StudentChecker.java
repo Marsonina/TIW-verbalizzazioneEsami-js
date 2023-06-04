@@ -36,7 +36,8 @@ public class StudentChecker implements Filter {
         // check if the client is a student
 		u = (User) s.getAttribute("user");
 		if (!u.getRole().equals("student")) {
-			res.sendRedirect(loginpath);
+			res.setStatus(403);
+			res.setHeader("Location", loginpath);
 			return;
 		}
 		// pass the request along the filter chain
