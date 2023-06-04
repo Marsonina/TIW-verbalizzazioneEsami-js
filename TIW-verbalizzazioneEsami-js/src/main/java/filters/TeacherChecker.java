@@ -39,7 +39,8 @@ public class TeacherChecker implements Filter {
 		User u = null;
 		u = (User) s.getAttribute("user");
 		if (!u.getRole().equals("teacher")) {
-			res.sendRedirect(loginpath);
+			res.setStatus(403);
+			res.setHeader("Location", loginpath);
 			return;
 		}
 		// pass the request along the filter chain

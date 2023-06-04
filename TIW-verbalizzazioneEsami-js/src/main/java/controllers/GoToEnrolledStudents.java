@@ -60,7 +60,7 @@ public class GoToEnrolledStudents extends HttpServlet {
 			String currTeacher = cDao.findOwnerTeacher();
 			//checking if the current teacher owns the selected course
 			if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				response.getWriter().println("Bad request, retry!");
 				return;
 			}
