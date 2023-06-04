@@ -54,21 +54,27 @@ public class GoToHomeTeacher extends HttpServlet {
 		try {
 			courses = tDao.getCourses();
 			if (chosenCourse != null) { 
-				chosenCourseId = Integer.parseInt(chosenCourse);
-				//exams corresponding to selected course
-				exams = tDao.getExamDates(chosenCourseId);
-				//check permissions
-				CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
-				if(cDao.findCourse() == null) {
+				if (chosenCourse.isEmpty()) {
 					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-					response.getWriter().println("Bad request, retry!");
+					response.getWriter().println("Error in course id selection");
 					return;
-				}
-				String currTeacher = cDao.findOwnerTeacher();
-				if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().println("Bad request, retry!");
-					return;
+				}else {
+					chosenCourseId = Integer.parseInt(chosenCourse);
+					//exams corresponding to selected course
+					exams = tDao.getExamDates(chosenCourseId);
+					//check permissions
+					CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
+					if(cDao.findCourse() == null) {
+						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+						response.getWriter().println("Inexistent course");
+						return;
+					}
+					String currTeacher = cDao.findOwnerTeacher();
+					if(currTeacher == null || !currTeacher.equals(user.getMatricola())) {
+						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+						response.getWriter().println("Not owned course");
+						return;
+					}
 				}
 			}
 		} catch (SQLException e) {

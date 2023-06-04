@@ -56,22 +56,28 @@ public class GoToHomeStudent extends HttpServlet {
 			courses = sDao.getCourses();
 			
 			if (chosenCourse != null) { 
-				chosenCourseId = Integer.parseInt(chosenCourse);
-				//exam's available dates corresponding to the selected course
-				exams = sDao.getExamDates(chosenCourseId);
-				CourseDAO cDao = new CourseDAO(connection, chosenCourseId);	
-				//checking if the selection of the course is correct
-				if(cDao.findCourse() == null) {
+				if (chosenCourse.isEmpty()) {
 					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-					response.getWriter().println("Trying to access to not existing course");
+					response.getWriter().println("Error in course id selection");
 					return;
-				}
-				//checking if the current student is enrolled to the selected course
-				List<String> currStudents = cDao.findAttendingStudent();
-				if(currStudents == null || !currStudents.contains(user.getMatricola())) {
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().println("Trying to access to not attended course");
-					return;
+				}else {
+					chosenCourseId = Integer.parseInt(chosenCourse);
+					//exams corresponding to selected course
+					exams = sDao.getExamDates(chosenCourseId);
+					//check permissions
+					CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
+					if(cDao.findCourse() == null) {
+						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+						response.getWriter().println("Inexistent course");
+						return;
+					}
+					//checking if the current student is enrolled to the selected course
+					List<String> currStudents = cDao.findAttendingStudent();
+					if(currStudents == null || !currStudents.contains(user.getMatricola())) {
+						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+						response.getWriter().println("Not owned course");
+						return;
+					}
 				}
 			}
 		} catch (SQLException e) {

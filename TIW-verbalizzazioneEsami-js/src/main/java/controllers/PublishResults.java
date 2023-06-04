@@ -3,6 +3,9 @@ package controllers;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -39,6 +42,20 @@ public class PublishResults extends HttpServlet {
 		User user = (User) s.getAttribute("user");
 		String selectedDate = request.getParameter("examDate");
 		String selectedCourse = request.getParameter("courseId");
+		if (selectedCourse == null || selectedCourse.isEmpty() || selectedDate == null || selectedDate.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Missing parameters");
+			return;
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        try {
+            LocalDate.parse(selectedDate, formatter);
+        } catch (DateTimeParseException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Error in data format");
+			return;
+        }
 		int chosenCourseId = Integer.parseInt(selectedCourse);
 		
 	    ExamDAO eDao = new ExamDAO(connection,chosenCourseId,selectedDate);
