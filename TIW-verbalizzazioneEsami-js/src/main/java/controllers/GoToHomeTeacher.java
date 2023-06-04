@@ -59,7 +59,13 @@ public class GoToHomeTeacher extends HttpServlet {
 					response.getWriter().println("Error in course id selection");
 					return;
 				}else {
+					try {
 					chosenCourseId = Integer.parseInt(chosenCourse);
+					}catch(NumberFormatException e) {
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().println("Bad request, retry!");
+						return;
+					}
 					//exams corresponding to selected course
 					exams = tDao.getExamDates(chosenCourseId);
 					//check permissions

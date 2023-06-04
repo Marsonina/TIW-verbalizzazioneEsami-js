@@ -55,7 +55,7 @@ CREATE TABLE `course_students` (
   `matricolaStudent` varchar(6) NOT NULL,
   `courseId` int NOT NULL,
   PRIMARY KEY (`matricolaStudent`,`courseId`),
-  KEY `courseId_idx` (`courseId`) /*!80000 INVISIBLE */,
+  KEY `courseId_idx` (`courseId`) /*!80000 INblock */,
   CONSTRAINT `courseIdStudent` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `matricolaStudentStudent` FOREIGN KEY (`matricolaStudent`) REFERENCES `student` (`matricola`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -82,7 +82,7 @@ CREATE TABLE `exam` (
   `courseId` int NOT NULL,
   `date` date NOT NULL,
   PRIMARY KEY (`courseId`,`date`),
-  KEY `date_idx` (`date`) /*!80000 INVISIBLE */,
+  KEY `date_idx` (`date`) /*!80000 INblock */,
   KEY `courseId_idx` (`courseId`),
   CONSTRAINT `courseIdExam` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

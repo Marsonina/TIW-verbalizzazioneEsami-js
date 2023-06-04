@@ -50,13 +50,13 @@ public class ModifyMark extends HttpServlet {
 		
 		HttpSession s = request.getSession();
 		
-		
 		User user = (User) s.getAttribute("user");
 		
 		String chosenCourse = request.getParameter("courseId");
 		String chosenExam = request.getParameter("examDate");
 		String[] examMark = request.getParameterValues("examMark");
 		String[] matricoleExam = request.getParameterValues("matricole");
+		int chosenCourseId = 0;
 		
 		if (chosenCourse == null || chosenCourse.isEmpty() || chosenExam == null || chosenExam.isEmpty() || matricoleExam == null || matricoleExam.length == 0 || examMark == null || examMark.length == 0 ) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -72,7 +72,13 @@ public class ModifyMark extends HttpServlet {
 			response.getWriter().println("Error in data format");
 			return;
         }
-        int chosenCourseId = Integer.parseInt(chosenCourse);
+        try {
+			chosenCourseId = Integer.parseInt(chosenCourse);
+			}catch(NumberFormatException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
 		ExamDAO eDao = new ExamDAO(connection, chosenCourseId, chosenExam);
 
 		//check permissions
@@ -116,6 +122,11 @@ public class ModifyMark extends HttpServlet {
 				ExamStudent examStud = new ExamStudent();
 				try {
 					examStud = eDao.getResult(matricoleExam[i]);
+					if(examStud == null) {
+						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+						response.getWriter().println("Bad request, retry!");
+						return;
+					}
 					//checking if the mark is already published or verbalized
 					if(!(examStud.getResultState()).equals("PUBBLICATO")&& !(examStud.getResultState()).equals("VERBALIZZATO")) {
 						//change the mark of the student

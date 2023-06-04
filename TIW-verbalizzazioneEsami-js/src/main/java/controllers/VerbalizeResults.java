@@ -51,14 +51,25 @@ public class VerbalizeResults extends HttpServlet {
 		
 		String selectedDate = request.getParameter("examDate");
 		String selectedCourse = request.getParameter("courseId");
+		int chosenCourseId = 0;
 		
+		try {
+			chosenCourseId = Integer.parseInt(selectedCourse);
+		}catch(NumberFormatException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+		}
+		
+		//missing parameters
 		if (selectedCourse == null || selectedCourse.isEmpty() || selectedDate == null || selectedDate.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Missing parameters");
 			return;
 		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+		
+		//check data format
         try {
             LocalDate.parse(selectedDate, formatter);
         } catch (DateTimeParseException e) {
@@ -72,10 +83,10 @@ public class VerbalizeResults extends HttpServlet {
 		Verbal verbal = new Verbal();
 	    Boolean checkVerbalize=false;
 		
-	    //checl permissions
+	    //check permissions
 		try {
 			//checking if the selected course exists
-			CourseDAO cDao = new CourseDAO(connection, Integer.parseInt(selectedCourse));
+			CourseDAO cDao = new CourseDAO(connection, chosenCourseId);
 			if(cDao.findCourse() == null) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				response.getWriter().println("Error with course choice");

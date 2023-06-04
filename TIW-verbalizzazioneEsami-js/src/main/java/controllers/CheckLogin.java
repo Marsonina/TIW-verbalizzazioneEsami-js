@@ -45,7 +45,7 @@ public class CheckLogin extends HttpServlet {
 		String role ;
 		usrn = StringEscapeUtils.escapeJava(request.getParameter("username"));
 		pwd = StringEscapeUtils.escapeJava(request.getParameter("pwd"));
-		role = StringEscapeUtils.escapeJava(request.getParameter("role"));
+		role = request.getParameter("role");
 		
 		UserDAO usr = new UserDAO(connection);
 		User u = null;

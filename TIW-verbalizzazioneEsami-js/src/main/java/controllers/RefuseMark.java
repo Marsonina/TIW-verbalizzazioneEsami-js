@@ -44,6 +44,7 @@ public class RefuseMark extends HttpServlet {
 		User user = (User) s.getAttribute("user");
 		String chosenExam = request.getParameter("examDate");
 		String chosenCourse = request.getParameter("courseId");
+		int chosenCourseId = 0;
 		
 		if (chosenCourse == null || chosenCourse.isEmpty() || chosenExam == null || chosenExam.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -60,7 +61,13 @@ public class RefuseMark extends HttpServlet {
 			return;
         }
         
-		int chosenCourseId = Integer.parseInt(chosenCourse);
+        try {
+			chosenCourseId = Integer.parseInt(chosenCourse);
+			}catch(NumberFormatException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
 		
 		ExamDAO eDao = new ExamDAO(connection, chosenCourseId, chosenExam);
 		ExamStudent examStudent = new ExamStudent();

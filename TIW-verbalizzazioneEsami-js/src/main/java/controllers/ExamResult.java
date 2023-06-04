@@ -51,6 +51,7 @@ public class ExamResult extends HttpServlet {
 		String chosenExam ;
 		chosenCourse = StringEscapeUtils.escapeJava(request.getParameter("courseId"));
 		chosenExam = StringEscapeUtils.escapeJava(request.getParameter("examDate"));
+		int chosenCourseId = 0;
 		
 		if (chosenCourse == null || chosenCourse.isEmpty() || chosenExam == null || chosenExam.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -67,7 +68,19 @@ public class ExamResult extends HttpServlet {
 			return;
         }
 		
-		int chosenCourseId = Integer.parseInt(chosenCourse);
+        try {
+        	try {
+			chosenCourseId = Integer.parseInt(chosenCourse);
+			}catch(NumberFormatException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+    		}
+			}catch(NumberFormatException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
 		
 		ExamDAO eDao = new ExamDAO(connection, chosenCourseId, chosenExam);
 		ExamStudent examStudent = new ExamStudent();

@@ -48,6 +48,7 @@ public class GoToModifyPage extends HttpServlet {
 		String chosenCourse = request.getParameter("courseId");
 		String chosenExam = request.getParameter("examDate");
 		String arrayStudents = request.getParameter("matricola");
+		int chosenCourseId;
 		Gson gson = new Gson();
 		List<String> matricoleExam = new ArrayList<>(Arrays.asList(gson.fromJson(arrayStudents, String[].class)));
 		
@@ -66,7 +67,13 @@ public class GoToModifyPage extends HttpServlet {
 			return;
         }
         
-		int chosenCourseId = Integer.parseInt(chosenCourse);
+        try {
+			chosenCourseId = Integer.parseInt(chosenCourse);
+			}catch(NumberFormatException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Bad request, retry!");
+				return;
+			}
 		ExamDAO eDao = new ExamDAO(connection, chosenCourseId, chosenExam);
 		ExamStudent examStudent = new ExamStudent();
 		
@@ -107,6 +114,11 @@ public class GoToModifyPage extends HttpServlet {
 		for(String matricola: matricoleExam) {
 			try {
 				examStudent = eDao.getResult(matricola);
+				if(examStudent == null) {
+					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+					response.getWriter().println("The student isn't correct");
+					return;
+				}
 			}catch (SQLException e) {
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				response.getWriter().println("Internal server error, please retry later!");

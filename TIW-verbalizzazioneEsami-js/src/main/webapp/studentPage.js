@@ -52,7 +52,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
   this.courseslist = _courseslist;
 
   this.reset = function() {
-    this.coursescontainer.style.visibility = "hidden";
+    this.coursescontainer.style.display = "none";
     this.title.textContent = " ";
   };
 
@@ -106,7 +106,6 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       courseLink.addEventListener("click", handleClick);
 	
 	  function handleClick(e) {
-	  	console.log("course");
 	    var allRows = document.querySelectorAll("tr");
         allRows.forEach(function(row) {
         	row.classList.remove("current");
@@ -118,7 +117,7 @@ function CoursesList(_title, _coursescontainer, _courseslist) {
       row.appendChild(nameCell);
       tableBody.appendChild(row);
     });
-    this.coursescontainer.style.visibility = "visible"; 
+    this.coursescontainer.style.display = "block"; 
   };
 }
 
@@ -132,12 +131,12 @@ function ExamsList(_title, _examslist){
     this.examDate = form.querySelector('select[name="examDate"]');
     
     this.reset = function() {
-    	this.examslist.style.visibility = "hidden";
+    	this.examslist.style.display = "none";
     };
 
   	this.show = function(courseId) {
 		document.getElementById("noExams").textContent = " ";  
-		this.examslist.style.visibility = "visible"; 
+		this.examslist.style.display = "block"; 
 	    var self = this;
 	    makeCall("GET", "GoToHomeStudent?courseId="+courseId, null, function(req) {
 	      if (req.readyState == 4) {
@@ -165,7 +164,6 @@ function ExamsList(_title, _examslist){
   };
 	
   this.update = function(arrayexams) {
-	  console.log(this.selectedCourseId);
 	  this.title.textContent = "Exam dates for the course number: " + this.selectedCourseId;
 	  var examDateElement = this.examDate 
 	  // Clear any existing options from the select element
@@ -185,8 +183,6 @@ function ExamsList(_title, _examslist){
 	  // Add event listener
 	  function handleClick(e) {
 	    var selectedExam = self.examDate.value;
-	    console.log("esam");
-	    console.log(self.selectedCourseId, selectedExam);
 	    result.show(self.selectedCourseId, selectedExam);
 	  }
   }	
@@ -200,22 +196,21 @@ function Result(_title,_resultcontainer){
 	this.courseId = null;
 	
 	this.reset = function() {
-		this.title.style.visibility = "hidden";
-		this.resultcontainer.style.visibility = "hidden";
+		this.title.style.display = "none";
+		this.resultcontainer.style.display = "none";
 	};
 	
 	this.show = function(courseid, examdate){
 		pageManager.refresh();
 	  	pageManager.returnHome();
-		this.title.style.visibility = "visible"; 
-		this.resultcontainer.style.visibility = "visible";
+		this.title.style.display = "block"; 
+		this.resultcontainer.style.display = "block";
 	    var self = this;
 	    makeCall("GET", "ExamResult?courseId="+courseid+"&examDate="+examdate, null, function(req) {
 	      if (req.readyState == 4) {
 	        var message = req.responseText;
 	        if (req.status == 200) {
 	          var response = JSON.parse(req.responseText);
-	          console.log(response);
 	          if(response.resultState === "NON INSERITO" || response.resultState === "INSERITO") {
 				  document.getElementById("examInfo").textContent = "Il voto non è disponibile";
 	            return;
@@ -258,7 +253,6 @@ function Result(_title,_resultcontainer){
 		  if (student.resultState === 'PUBBLICATO') {
 		    refuseButton.disabled = false;
 		  } else if (student.resultState === 'RIFIUTATO'){
-			  console.log("Rifiutato");
 		     document.getElementById('refuse').textContent="Il voto è stato rifiutato"
 		  } else if (student.resultState === 'VERBALIZZATO'){
 			  refuseButton.disabled = true;
@@ -271,7 +265,6 @@ function Result(_title,_resultcontainer){
 	  document.getElementById('refusebotton').addEventListener("click", handleClick);
 	  // Add event listener
 	  function handleClick(e) {
-	    console.log("refuse");
 	    refuse(self.examDate,self.courseId); 
 	  }
 	}	
@@ -305,7 +298,7 @@ function PageManager(){
     document.getElementById("courses_container"),document.getElementById("courses_list")); 
     examsList = new ExamsList(document.getElementById("title2"),document.getElementById("goToViewRes"));   
    	result = new Result(document.getElementById("title3"),document.getElementById("examInfo"));
-    document.getElementById("homePage").style.visibility = "hidden";
+    document.getElementById("homePage").style.display = "none";
     
      document.querySelector("a[href='Logout']").addEventListener('click', () => {
         window.sessionStorage.removeItem('username');
@@ -319,7 +312,7 @@ function PageManager(){
     }
   
   	this.refresh = function(){
-		document.getElementById("homePage").style.visibility = "hidden";
+		document.getElementById("homePage").style.display = "none";
 		document.getElementById("noExams").textContent = " ";
 		coursesList.reset();
 		examsList.reset();
@@ -327,13 +320,12 @@ function PageManager(){
 	}
 	
 	document.getElementById("homePage").addEventListener('click', function() {
-		console.log("return");
 		pageManager.refresh();
 		coursesList.show();
 	 });
 	
 	this.returnHome = function(){
-	    document.getElementById("homePage").style.visibility = "visible";
+	    document.getElementById("homePage").style.display = "block";
      }
 
 }
