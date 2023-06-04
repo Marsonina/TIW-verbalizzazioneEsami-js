@@ -768,7 +768,6 @@ function PageManager(){
 	}
 	//key that allows the return to the homePage view containing teacher's courses
 	document.getElementById("homePage").addEventListener('click', function() {
-		console.log("return");
 		pageManager.refresh();
 		coursesList.show();
 	 });
@@ -779,8 +778,7 @@ function PageManager(){
     //key that allows the return to the view of all enrolled students 
     this.returnStudents = function(courseId, examDate){
 		document.getElementById("enrolledPage").style.visibility = "visible";
-	    document.getElementById("enrolledPage").addEventListener('click', function() {
-		console.log("return");	
+	    document.getElementById("enrolledPage").addEventListener('click', function() {	
 		pageManager.refresh();
 		studentsList.show(courseId, examDate);
 	  });
