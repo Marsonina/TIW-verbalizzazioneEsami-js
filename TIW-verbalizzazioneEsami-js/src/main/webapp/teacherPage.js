@@ -482,8 +482,8 @@ function ModifyMark(_title, _studentContent){
 		  if (child) {
 			  child.remove();
 		  }
-	    }
-
+	    }else if (validateFormValues(input)=== false)
+	    	document.getElementById("errormessageMark").textContent = "Insert a valid mark";
 	 };
 
     }
@@ -686,8 +686,10 @@ function MultipleModify(_modifycontainer, _modifystudents){
 		  resultInputs.forEach(function(input) {
 		  if(validateFormValues(input.value))
 		     results.push(input.value);
-		  else 
-		     formOkay = false;
+		  else{
+			 formOkay = false; 
+			 document.getElementById("errormessageMark2").textContent = "Insert a valid mark";
+		  }
 		  });
 		  if(formOkay){
 			 courseId = self.courseId;
